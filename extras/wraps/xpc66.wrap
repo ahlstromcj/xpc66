@@ -1,0 +1,26 @@
+#----------------------------------------------------------------------------
+#
+# Xpc66 Library Wrapper
+# Chris Ahlstrom
+# 2024-04-15 to 2024-04-15
+#
+#   Xpc66 wrapper for GitHub repository
+#
+#----------------------------------------------------------------------------
+
+[wrap-git]
+
+url = https://github.com/ahlstromcj/xpc66.git
+revision = head
+depth = 1
+
+[provide]
+
+#----------------------------------------------------------------------------
+# These dependencies are declared in xpc66/library/meson.build.
+#----------------------------------------------------------------------------
+
+libxpc66_include = libxpc66_include_dep
+libxpc66_library = libxpc66_library_dep
+
+# vim: ft=dosini

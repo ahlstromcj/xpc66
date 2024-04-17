@@ -1,0 +1,178 @@
+%-------------------------------------------------------------------------------
+% xpc
+%-------------------------------------------------------------------------------
+%
+% \file        xpc.tex
+% \library     Documents
+% \author      Chris Ahlstrom
+% \date        2024-04-16
+% \update      2024-04-16
+% \version     $Revision$
+% \license     $XPC_GPL_LICENSE$
+%
+%     Provides a description of the entities in the xpc66 library.
+%
+%-------------------------------------------------------------------------------
+
+\section{Xpc Namespace}
+\label{sec:xpc_namespace}
+
+   This section provides a useful walkthrough of the \texttt{xpc} namespace of
+   the \textsl{xpc66} library.
+   In addition, a \texttt{C}-only module is provided.
+
+   Here are the classes (or modules) in this namespace:
+
+   \begin{itemize}
+      \item \texttt{automutex}
+      \item \texttt{condition}
+      \item \texttt{daemonize}
+      \item \texttt{recmutex}
+      \item \texttt{ring\_buffer}
+      \item \texttt{shellexecute}
+      \item \texttt{timing}
+      \item \texttt{utilfunctions}
+   \end{itemize}
+
+\subsection{xpc::automutex}
+\label{subsec:xpc_namespace_automutex}
+
+   \texttt{xpc::automutex} provides a recursive
+   mutex that locks automatically when
+   created, and unlocks when destroyed.  This has a couple of benefits.
+   First, it is threadsafe in the face of exception handling.
+   Secondly, locking can be done with just one line of code.
+
+   It could potentially be replaced by
+   \texttt{std::lock\_guard<std::recursive\_mutex>}.
+   One reason we rolled our own was some difficulty experienced using
+   the standard mutex in the \textsl{Seq66} (\cite{seq66}) application.
+
+   The constructor takes a reference to an \texttt{xpc::recmutex}
+   (see below), stores it, and locks it.
+   The destructor simply unlocks it.
+
+\subsection{xpc::condition}
+\label{subsec:xpc_namespace_condition}
+
+   \texttt{xpc::condition} provides an internal recursive mutex and a
+   private implementation of the \texttt{wait()} and
+   \texttt{signal()} functions.
+   The implementation uses a
+   \texttt{pthread\_cond\_t} condition variable and
+   \texttt{xpc::recmutex} to implement these functions.
+
+   Also provided is the more useful and simpler
+   \texttt{xpc::synchronizer} \textsl{abstract base class} which uses
+   an \texttt{std::mutex} and
+   an \texttt{std::condition\_variable}
+   to implement the \texttt{wait()} and \texttt{signal()} functions.
+   It requires the caller to derive a class which implements the
+   \textsl{virtual} function \texttt{predicate()} that decides
+   when synchronization has occurred.
+
+   For a good example of \texttt{xpc::synchronizer}, see
+   the \texttt{seq66::performer::synch} class defined
+   in the \texttt{performer} module of the \textsl{Seq66} project.
+
+\subsection{xpc::daemonize}
+\label{subsec:xpc_namespace_daemonize}
+
+   This module implements demonization code as described in
+   \textsl{The Linux Programming Interface} (\cite{lpi}).
+   It provides many options as expressed by the \texttt{daemonize\_flags}
+   enumeration:
+
+   \begin{itemize}
+      \item Don't chdir() to the file root directory '/'.
+      \item Don't close all open files.
+      \item No stdin etc. sent to /dev/null.
+      \item Don't call umask(0).
+      \item Don't call fork() a second time.
+      \item Don't change current directory.
+      \item Do not open a system log file.
+   \end{itemize}
+
+   The most important functions are
+   \texttt{daemonize()} and
+   \texttt{undaemonize()}.
+   For the usage of these functions, see the main module
+   \texttt{seq66rtcli} in the \textsl{Seq66} project.
+
+   Also provided in this module are functions for getting process information,
+   rerouting standard I/O, and flagging session saving, restart, and closing.
+
+   Note that this is a \texttt{C++}-only module using
+   \texttt{std::string} to pass and store information.
+
+\subsection{xpc::recmutex}
+\label{subsec:xpc_namespace_recmutex}
+
+   This recursive mutex is implemented using
+   \texttt{pthread\_mutex\_t} due to difficulties we had
+   with \texttt{C++11}'s \texttt{std::mutex} in the \textsl{Seq66} project.
+
+   Read the module's comments for more information on the ifs, ands, buts, or
+   maybes..
+
+\subsection{xpc::ring\_buffer}
+\label{subsec:xpc_namespace_ring_buffer}
+
+   This template class defines a flexible ring-buffer.
+   It support reading and writing, skipping, and the
+   \texttt{front()} and
+   \texttt{back()} functions.
+
+   The \texttt{ring\_buffer.cpp} file contains an explanation of the
+   implementation and some code to test the ring-buffer.
+
+\subsection{xpc::shellexecute}
+\label{subsec:xpc_namespace_shellexecute}
+
+   This module provides free functions in the \texttt{xpc} namespace
+   for spawning applications and opening PDFs and URLs.
+   These functions provide support for
+   \textsl{Linux/UNIX} and \texttt{Windows}.
+
+   \begin{verbatim}
+      command_line (const std::string & cmdline)
+      open_document (const std::string & name)
+      open_pdf (const std::string & pdfspec)
+      open_url (const std::string & pdfspec)
+      open_local_url (const std::string & pdfspec)
+   \end{verbatim}
+
+\subsection{xpc::timing}
+\label{subsec:xpc_namespace_timing}
+
+   This module provides free functions in the \texttt{xpc} namespace
+   for getting the system time and for sleeping.
+   These functions provide support for
+   \textsl{Linux/UNIX} and \texttt{Windows}.
+
+   \begin{verbatim}
+      std_sleep_us ()
+      microsleep (int us)
+      millisleep (int ms)
+      thread_yield ()
+      microtime ()
+      millitime ()
+      set_thread_priority (std::thread & t, int p)
+      set_timer_services (bool on)
+   \end{verbatim}
+
+   More explanation can be found in \texttt{timing.cpp}.
+
+\subsection{xpc::utilfunctions}
+\label{subsec:xpc_namespace_utilfunctions}
+
+   In order to keep the \textsl{Xpc66 library} independent
+   of the \textsl{Cfg66 library}, this module
+   provides cut-down versions of the message functions of
+   the latter.
+   It also uses some code to work with directories,
+   getting the date/time, and widening ASCII strings.
+
+%-------------------------------------------------------------------------------
+% vim: ts=3 sw=3 et ft=tex
+%-------------------------------------------------------------------------------

@@ -1,0 +1,72 @@
+INSTALL for Cfg66 v. 0.1.0 and above
+Chris Ahlstrom
+2024-04-15 to 2024-04-15
+
+Meson is the build system for the Cfg66 library. Meson 1.1 and above is
+required. The 'meson.options' file replaces 'meson_options.txt'.
+
+In order to simplify life, a POSIX shell script, 'work.sh', is provided.
+The most important options are:
+
+    -   --clean. Removes all build products from the build directory.
+    -   --make or no option. Build the library and test code in DEBUG mode.
+    -   --clang. Build the code using the Clang compiler.
+    -   --help. Show all available options; there a more than just these.
+
+Build:
+
+    $ ./work.sh --clean (when Meson build/options files change)
+    $ ./work.sh --clang (if desired, to use Clang)
+    $ ./work.sh         (use default compiler)
+
+Tests:
+
+    TO DO
+
+    $ ./library/tests/tests.sh
+
+    This script runs all of the tests listed in the file
+    './library/tests/testlines.list', plus a couple more.
+
+Install:
+
+    The easiest way to install is to use the 'work.sh' script after rebuilding
+    for release (i.e. no debug code):
+
+    $ ./work.sh --clean
+    $ ./work.sh --release
+    $ ./work.sh --install
+
+    Of course, one can use Meson without this script if desired. Study the
+    script for details.
+
+Subproject:
+
+    If one does not want to install Cfg66, Meson '*.wrap' files are
+    provided to use Cfg66 as a Meson subproject.
+
+    See extras/wraps/potext-git.wrap in particular.
+
+    -   Make sure the using project is built using Meson.
+    -   Create a 'subprojects' directory in the using project.
+    -   Copy the desired '.wrap' file from the 'extras/wraps' directory
+        into 'subprojects'.
+    -   Build!
+
+    An example is included: copy the file extras/code/mini-potext-test.tar.xz
+    to a safe place (such as a temp directory). In that directory, do:
+
+        $ tar xf mini-potext-test.tar.xz
+        $ cd hellopotext
+
+Build tools:
+
+    -   C/C++ compiler. On Linux etc., the GNU and Clang compilers are
+        support. On Windows, currently tested only with the Mingw compiler.
+    -   Python.
+    -   Meson and Ninja. In Windows, they can be installed from
+        the same Meson release '*.msi' file.
+    -   C++17 and above is required to build Cfg66. The GNU and Clang
+        compilers support it.
+
+# vim: sw=4 ts=4 wm=4 et ft=sh

@@ -1,0 +1,8 @@
+Extras (Contrib) Directory
+Chris Ahlstrom
+2022-07-03 to 2022-10-28
+
+This directory might hold ideas, vim syntax files, old code, and other items
+that are not part of the project, but might contribute to it in some way.
+
+# vim: sw=4 ts=4 wm=8 et ft=sh

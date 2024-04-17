@@ -1,0 +1,8 @@
+Tests Directory for the xpc66 library
+Chris Ahlstrom
+2022-07-03 to 2022-07-03
+
+This directory is where all test products will reside.  See build/README for
+more information.
+
+# vim: sw=4 ts=4 wm=8 et ft=sh
