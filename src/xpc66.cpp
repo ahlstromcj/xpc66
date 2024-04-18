@@ -24,7 +24,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2024-04-15
- * \updates       2024-04-15
+ * \updates       2024-04-18
  * \license       GNU GPLv2 or above
  *
  */
@@ -34,7 +34,11 @@
 std::string
 xpc66_version ()
 {
-    static std::string s_info = "xpc66-0.1 library 2024-04-15";
+    /*
+     * static std::string s_info = "xpc66-0.1 library 2024-04-15";
+     */
+
+    static std::string s_info = XPC66_NAME "-" XPC66_VERSION " " __DATE__ ;
     return s_info;
 }
 

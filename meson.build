@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2023-04-17
+# \updates     2023-04-18
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. It was part of the libs66
@@ -29,7 +29,7 @@
 
 project('xpc66',
    [ 'c', 'cpp' ],
-   version: '0.1.0',
+   version: '0.1.1',
    license: 'GPLv3',
    meson_version: '>=1.1.0',
    default_options: [
@@ -43,14 +43,16 @@ project('xpc66',
 #-----------------------------------------------------------------------------
 
 xpc66_description = 'Refactoring the base Seq66 OS-dependent modules.'
-xpc66_date = '2024-04-17'
+xpc66_date = '2024-04-18'
 xpc66_version = meson.project_version()
 xpc66_api_version = '0.1'
 xpc66_build_type = get_option('buildtype')
 xpc66_debug = get_option('buildtype').contains('debug')
 xpc66_project_base = 'xpc66-@0@'.format(xpc66_api_version)
+xpc66_library_base = 'libcfg66-@0@'.format(xpc66_api_version)
 xpc66_project_root = meson.project_source_root()
 xpc66_libtype = get_option('default_library')
+xpc66_data_dir = get_option('datadir') / 'xpc66-@0@'.format(xpc66_api_version)
 xpc66_subproj = meson.is_subproject()
 
 if xpc66_debug
@@ -60,13 +62,11 @@ if xpc66_debug
 endif
 
 #-----------------------------------------------------------------------------
-# Easy access to directory options.  Interim until meson version 0.64.0
-# We want to be able to install the header files to subdirectories of,
-# for example, /usr/local/include/xpc66-0.1, just as they appear in this
-# project.
+# Easy access to directory options.
 #-----------------------------------------------------------------------------
 
 xpc66_dir = 'xpc66-@0@'.format(xpc66_api_version)
+xpc66_sub_dir = join_paths(xpc66_dir, 'xpc66')                       # hmmmm
 xpc66_prefix = get_option('prefix')
 xpc66_bindir = join_paths(xpc66_prefix, get_option('bindir'))
 xpc66_includedir = join_paths(xpc66_prefix, get_option('includedir'), xpc66_dir)
@@ -77,6 +77,7 @@ xpc66_metainfodir = join_paths(xpc66_datadir, 'metainfo')
 xpc66_docdir = join_paths(xpc66_prefix, xpc66_datadir, 'doc', xpc66_dir)
 xpc66_project_root = meson.project_source_root()
 xpc66_libtype = get_option('default_library')
+libraries_root = '.'
 libraries_include_top = '.'
 libxpc66_include_top = join_paths(libraries_include_top, 'include')
 
@@ -134,8 +135,8 @@ libxpc66_includedirs = include_directories(libxpc66_include_top,
    )
 
 build_args += [
-   '-DXPC66_NAME=' + meson.project_name(),
-   '-DXPC66_VERSION=' + meson.project_version()
+   '-DXPC66_NAME=' + '"' + meson.project_name() + '"',
+   '-DXPC66_VERSION=' + '"' + meson.project_version() + '"'
    ]
 
 #-----------------------------------------------------------------------------
@@ -175,9 +176,9 @@ empty_depends = [ ]
 #-----------------------------------------------------------------------------
 
 if target_machine.system() == 'windows' or target_machine.system() == 'cygwin'
-  build_args += '-DLIBPUBLIC="__declspec(dllexport)"'
+   build_args += '-DLIBPUBLIC="__declspec(dllexport)"'
 else
-  build_args += '-DLIBPUBLIC=__attribute__((visibility("default")))'
+   build_args += '-DLIBPUBLIC=__attribute__((visibility("default")))'
 endif
 
 #-----------------------------------------------------------------------------
@@ -200,12 +201,12 @@ endif
 #
 #-----------------------------------------------------------------------------
 
-xpc66_library = static_library(
+xpc66_library_build = static_library(
    xpc66_project_base,
    libxpc66_sources,
    install: true,
    install_dir: xpc66_libdir,
-   c_args: build_args,
+   cpp_args: build_args,
    dependencies: empty_depends,
    include_directories: [ libxpc66_includedirs ]
    )
@@ -215,8 +216,8 @@ xpc66_library = static_library(
 #-----------------------------------------------------------------------------
 
 xpc66_dep = declare_dependency(
-   include_directories: libxpc66_includedirs,
-   link_with: xpc66_library
+   include_directories: [ libxpc66_includedirs ],
+   link_with: [ xpc66_library_build ]
    )
 
 #-----------------------------------------------------------------------------
@@ -232,21 +233,28 @@ install_headers(libxpc66_headers, subdir: xpc66_dir, preserve_path: true)
 pkg_mod = import('pkgconfig')
 
 pkg_mod.generate(
-   xpc66_library,
+   xpc66_library_build,
    filebase: xpc66_project_base,
    version: xpc66_version,
    name: xpc66_project_base,
    description: xpc66_description,
    install_dir: alt_pkgconfig_libdir,
    subdirs: xpc66_dir,                  # not xpc66_project_base
-   libraries: xpc66_library
+   libraries: xpc66_library_build
    )
 
-if get_option('enable-tests')
-   subdir('tests')
-endif
+if meson.is_subproject()
 
-if not meson.is_subproject()
+   libxpc66_include_dep = declare_dependency(
+      include_directories : xpc66_includedirs
+      )
+
+   libxpc66_library_dep = declare_dependency(
+      include_directories : xpc66_includedirs,
+      link_with : xpc66_library_build
+      )
+
+else
 
 # TODO: figure out where to put and install the logo
 
@@ -259,6 +267,15 @@ if not meson.is_subproject()
          ),
       install_dir : get_option('docdir')
       )
+
+   libxpc66_dep = declare_dependency(
+      include_directories : libxpc66_includedirs,
+      link_with : xpc66_library_build
+      )
+
+   if get_option('enable-tests')
+      subdir('tests')
+   endif
 
 endif
 
