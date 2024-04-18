@@ -246,11 +246,11 @@ pkg_mod.generate(
 if meson.is_subproject()
 
    libxpc66_include_dep = declare_dependency(
-      include_directories : xpc66_includedirs
+      include_directories : xpc66_includedir
       )
 
    libxpc66_library_dep = declare_dependency(
-      include_directories : xpc66_includedirs,
+      include_directories : xpc66_includedir,
       link_with : xpc66_library_build
       )
 
