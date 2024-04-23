@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2023-04-18
+# \updates     2024-04-23
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. It was part of the libs66
@@ -43,7 +43,7 @@ project('xpc66',
 #-----------------------------------------------------------------------------
 
 xpc66_description = 'Refactoring the base Seq66 OS-dependent modules.'
-xpc66_date = '2024-04-18'
+xpc66_date = '2024-04-23'
 xpc66_version = meson.project_version()
 xpc66_api_version = '0.1'
 xpc66_build_type = get_option('buildtype')
@@ -201,7 +201,7 @@ endif
 #
 #-----------------------------------------------------------------------------
 
-xpc66_library_build = static_library(
+xpc66_library_build = library(
    xpc66_project_base,
    libxpc66_sources,
    install: true,
@@ -215,7 +215,7 @@ xpc66_library_build = static_library(
 # Make this library usable as a Meson subproject.
 #-----------------------------------------------------------------------------
 
-xpc66_dep = declare_dependency(
+libxpc66_dep = declare_dependency(
    include_directories: [ libxpc66_includedirs ],
    link_with: [ xpc66_library_build ]
    )
@@ -246,11 +246,11 @@ pkg_mod.generate(
 if meson.is_subproject()
 
    libxpc66_include_dep = declare_dependency(
-      include_directories : xpc66_includedir
+      include_directories : libxpc66_includedirs
       )
 
    libxpc66_library_dep = declare_dependency(
-      include_directories : xpc66_includedir,
+      include_directories : libxpc66_includedirs,
       link_with : xpc66_library_build
       )
 
@@ -266,11 +266,6 @@ else
          'doc/xpc66-library-guide.pdf'
          ),
       install_dir : get_option('docdir')
-      )
-
-   libxpc66_dep = declare_dependency(
-      include_directories : libxpc66_includedirs,
-      link_with : xpc66_library_build
       )
 
    if get_option('enable-tests')
