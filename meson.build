@@ -29,10 +29,10 @@
 
 project('xpc66',
    [ 'c', 'cpp' ],
-   version: '0.1.1',
-   license: 'GPLv3',
-   meson_version: '>=1.1.0',
-   default_options: [
+   version : '0.1.1',
+   license : 'GPLv3',
+   meson_version : '>=1.1.0',
+   default_options : [
       'c_std=c11', 'cpp_std=c++14', 'warning_level=3',
       'default_library=both'
       ]
@@ -138,6 +138,18 @@ build_args += [
    ]
 
 #-----------------------------------------------------------------------------
+# Only make public interfaces visible
+#-----------------------------------------------------------------------------
+
+'''
+if target_machine.system() == 'windows' or target_machine.system() == 'cygwin'
+   build_args += '-DLIBPUBLIC="__declspec(dllexport)"'
+else
+   build_args += '-DLIBPUBLIC=__attribute__((visibility("default")))'
+endif
+'''
+
+#-----------------------------------------------------------------------------
 # Set up some "HAVE" macros.  By default the header file is generated in the
 # "build" directory. If configure_file() is moved to include/meson.build,
 # the the header goes into "build/include", which is what we want.
@@ -159,25 +171,11 @@ subdir('src')
 # Dependencies on Linux
 #-----------------------------------------------------------------------------
 #
-# Later:
-#
-#  if host_machine.system() == 'linux'
-#     . . .
-#  endif
+# None, yet.
 #
 #-----------------------------------------------------------------------------
 
 empty_depends = [ ]
-
-#-----------------------------------------------------------------------------
-# Only make public interfaces visible
-#-----------------------------------------------------------------------------
-
-if target_machine.system() == 'windows' or target_machine.system() == 'cygwin'
-   build_args += '-DLIBPUBLIC="__declspec(dllexport)"'
-else
-   build_args += '-DLIBPUBLIC=__attribute__((visibility("default")))'
-endif
 
 #-----------------------------------------------------------------------------
 # We recommemd using a recent version of meson by installing it outside the
@@ -202,11 +200,11 @@ endif
 xpc66_library_build = library(
    xpc66_project_base,
    libxpc66_sources,
-   install: true,
-   install_dir: xpc66_libdir,
-   cpp_args: build_args,
-   dependencies: empty_depends,
-   include_directories: [ libxpc66_includes ]
+   install : true,
+   install_dir : xpc66_libdir,
+   cpp_args : build_args,
+   dependencies : empty_depends,
+   include_directories : [ libxpc66_includes ]
    )
 
 #-----------------------------------------------------------------------------
@@ -216,15 +214,15 @@ xpc66_library_build = library(
 #-----------------------------------------------------------------------------
 
 libxpc66_dep = declare_dependency(
-   include_directories: [ libxpc66_includes ],
-   link_with: [ xpc66_library_build ]
+   include_directories : [ libxpc66_includes ],
+   link_with : [ xpc66_library_build ]
    )
 
 #-----------------------------------------------------------------------------
 # Make this library usable from the system's package manager.
 #-----------------------------------------------------------------------------
 
-install_headers(libxpc66_headers, subdir: xpc66_dir, preserve_path: true)
+install_headers(libxpc66_headers, subdir : xpc66_dir, preserve_path : true)
 
 #-----------------------------------------------------------------------------
 # Package config
@@ -234,27 +232,16 @@ pkg_mod = import('pkgconfig')
 
 pkg_mod.generate(
    xpc66_library_build,
-   filebase: xpc66_project_base,
-   version: xpc66_pkg_version,
-   name: xpc66_project_base,
-   description: xpc66_pkg_description,
-   install_dir: alt_pkgconfig_libdir,
-   subdirs: xpc66_dir,                  # not xpc66_project_base
-   libraries: xpc66_library_build
+   filebase : xpc66_project_base,
+   version : xpc66_pkg_version,
+   name : xpc66_project_base,
+   description : xpc66_pkg_description,
+   install_dir : alt_pkgconfig_libdir,
+   subdirs : xpc66_dir,                  # not xpc66_project_base
+   libraries : xpc66_library_build
    )
 
-if meson.is_subproject()
-
-   libxpc66_include_dep = declare_dependency(      # maybe unnecessary
-      include_directories : libxpc66_includes
-      )
-
-   libxpc66_library_dep = declare_dependency(
-      include_directories : libxpc66_includes,
-      link_with : xpc66_library_build
-      )
-
-else
+if not xpc66_subproj
 
 # TODO: figure out where to put and install the logo
 
@@ -293,19 +280,19 @@ summary(
       'Library Type' : xpc66_info_lib_type,
       'Subproject?' : xpc66_subproj
    },
-   section: 'Xpc66 Project'
+   section : 'Xpc66 Project'
    )
 
 summary(
    {
-      'prefix': xpc66_prefix,
-      'includedir': xpc66_includedir,
-      'bindir': xpc66_bindir,
-      'libdir': xpc66_libdir,
-      'datadir': xpc66_datadir,
-      'docdir': xpc66_docdir
+      'prefix' : xpc66_prefix,
+      'includedir' : xpc66_includedir,
+      'bindir' : xpc66_bindir,
+      'libdir' : xpc66_libdir,
+      'datadir' : xpc66_datadir,
+      'docdir' : xpc66_docdir
    },
-   section: 'Xpc66 Install Directories'
+   section : 'Xpc66 Install Directories'
    )
 
 #****************************************************************************

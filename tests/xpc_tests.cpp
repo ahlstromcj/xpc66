@@ -34,8 +34,8 @@
 #include <iostream>                 /* std::cout, std::cerr             */
 #include <string>                   /* std::string                      */
 
-#include "xpc/shellexecute.hpp"     /* xpc::open_pdf() for linkage test */
 #include "xpc66.hpp"                /* xpc66_version() function         */
+#include "xpc/shellexecute.hpp"     /* xpc::open_pdf() for linkage test */
 
 /*
  * Explanation text.

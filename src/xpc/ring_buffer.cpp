@@ -25,7 +25,7 @@
  * \library       xpc66 application
  * \author        Chris Ahlstrom
  * \date          2022-09-19
- * \updates       2022-11-23
+ * \updates       2024-04-24
  * \license       GNU GPLv2 or above
  *
  *  A lock-free ring buffer.
@@ -124,7 +124,7 @@ class ring_test
 
 public:
 
-    using cref = const ring_buffer<ring_test>::reference;
+    using cref = ring_buffer<ring_test>::const_reference;
 
 private:
 
@@ -158,7 +158,7 @@ public:
         return m_test_text;
     }
 
-    std::string to_string ();
+    std::string to_string () const;
 
 };              // class ring_test
 
@@ -195,7 +195,7 @@ ring_test::ring_test (int counter, const std::string & text) :
 }
 
 std::string
-ring_test::to_string ()
+ring_test::to_string () const
 {
     std::string result = "counter " + std::to_string(test_counter()) + "; ";
     result += "text '" + test_text() + "'.";

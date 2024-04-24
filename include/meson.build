@@ -37,17 +37,10 @@ libxpc66_headers += files(
    )
 
 configure_file(
-   input: 'xpc66-config.h.in',
-   output: 'xpc66-config.h',
-   configuration: cdata
+   input : 'xpc66-config.h.in',
+   output : 'xpc66-config.h',
+   configuration : cdata
    )
-
-#-----------------------------------------------------------------------------
-# Headers are installed via the main meson.build file.
-#
-#     install_headers(libxpc66_headers)
-#
-#-----------------------------------------------------------------------------
 
 #****************************************************************************
 # meson.build (xpc66/include)
