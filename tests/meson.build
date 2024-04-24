@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2024-04-23
+# \updates     2024-04-24
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. See the top-level meson.build
@@ -16,7 +16,7 @@
 
 xpc_tests_exe = executable(
    'xpc_tests',
-   sources : ['xpc_tests.cpp'],
+   sources : [ 'xpc_tests.cpp' ],
    dependencies : libxpc66_dep
    )
 

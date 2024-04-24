@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2024-04-23
+# \updates     2024-04-24
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. It was part of the libs66
@@ -42,44 +42,38 @@ project('xpc66',
 # Information for this sub-project.
 #-----------------------------------------------------------------------------
 
-xpc66_description = 'Refactoring the base Seq66 OS-dependent modules.'
-xpc66_date = '2024-04-23'
-xpc66_version = meson.project_version()
+xpc66_pkg_description = 'Refactoring the base Seq66 OS-dependent modules.'
+xpc66_pkg_version = meson.project_version()
 xpc66_api_version = '0.1'
-xpc66_build_type = get_option('buildtype')
+xpc66_info_date = '2024-04-24'
+xpc66_info_build_type = get_option('buildtype')
+xpc66_info_build_root = meson.project_build_root()
+xpc66_info_lib_type = get_option('default_library')
+xpc66_info_project_root = meson.project_source_root()
 xpc66_debug = get_option('buildtype').contains('debug')
 xpc66_project_base = 'xpc66-@0@'.format(xpc66_api_version)
-xpc66_library_base = 'libcfg66-@0@'.format(xpc66_api_version)
-xpc66_project_root = meson.project_source_root()
-xpc66_libtype = get_option('default_library')
-xpc66_data_dir = get_option('datadir') / 'xpc66-@0@'.format(xpc66_api_version)
 xpc66_subproj = meson.is_subproject()
 
 if xpc66_debug
-   if not meson.is_subproject()
-      add_global_arguments('-DDEBUG', language : 'cpp')
+   if not xpc66_subproj
+      add_project_arguments('-DDEBUG', language : 'cpp')
    endif
 endif
 
 #-----------------------------------------------------------------------------
-# Easy access to directory options.
+# Easy access to directory options. Commented out the unnecessary ones.
+# Many of these definitions are simply informative.
 #-----------------------------------------------------------------------------
 
 xpc66_dir = 'xpc66-@0@'.format(xpc66_api_version)
-xpc66_sub_dir = join_paths(xpc66_dir, 'xpc66')                       # hmmmm
 xpc66_prefix = get_option('prefix')
 xpc66_bindir = join_paths(xpc66_prefix, get_option('bindir'))
 xpc66_includedir = join_paths(xpc66_prefix, get_option('includedir'), xpc66_dir)
 xpc66_libdir = join_paths(xpc66_prefix, get_option('libdir'), xpc66_dir)
 xpc66_datadir = join_paths(xpc66_prefix, get_option('datadir'), xpc66_dir)
-xpc66_localedir = join_paths(xpc66_prefix, get_option('localedir'))
-xpc66_metainfodir = join_paths(xpc66_datadir, 'metainfo')
 xpc66_docdir = join_paths(xpc66_prefix, xpc66_datadir, 'doc', xpc66_dir)
-xpc66_project_root = meson.project_source_root()
-xpc66_libtype = get_option('default_library')
-libraries_root = '.'
-libraries_include_top = '.'
-libxpc66_include_top = join_paths(libraries_include_top, 'include')
+libraries_top = meson.project_source_root()      # not '.'
+libxpc66_include_top = join_paths(libraries_top, 'include')
 
 #-----------------------------------------------------------------------------
 # The *.pc file goes into $libdir/xpc66-0.1/pkgconfig instead of
@@ -129,10 +123,14 @@ os_unix = not os_win32
 # We prefer to use the style '#include "cfg/header.hpp".
 #-----------------------------------------------------------------------------
 
-libxpc66_includedirs = include_directories(libxpc66_include_top,
+libxpc66_includes = include_directories('.',    # libxpc66_include_top,
    'include',
    'include/xpc'
    )
+
+#-----------------------------------------------------------------------------
+# Used by the xpc66_version() function.
+#-----------------------------------------------------------------------------
 
 build_args += [
    '-DXPC66_NAME=' + '"' + meson.project_name() + '"',
@@ -208,15 +206,17 @@ xpc66_library_build = library(
    install_dir: xpc66_libdir,
    cpp_args: build_args,
    dependencies: empty_depends,
-   include_directories: [ libxpc66_includedirs ]
+   include_directories: [ libxpc66_includes ]
    )
 
 #-----------------------------------------------------------------------------
-# Make this library usable as a Meson subproject.
+# Make this library usable as a Meson subproject.  This allows a subproject to
+# easily specify how it should be used. This makes it interchangeable with the
+# same dependency that is provided externally (i.e. installed) by the system.
 #-----------------------------------------------------------------------------
 
 libxpc66_dep = declare_dependency(
-   include_directories: [ libxpc66_includedirs ],
+   include_directories: [ libxpc66_includes ],
    link_with: [ xpc66_library_build ]
    )
 
@@ -235,9 +235,9 @@ pkg_mod = import('pkgconfig')
 pkg_mod.generate(
    xpc66_library_build,
    filebase: xpc66_project_base,
-   version: xpc66_version,
+   version: xpc66_pkg_version,
    name: xpc66_project_base,
-   description: xpc66_description,
+   description: xpc66_pkg_description,
    install_dir: alt_pkgconfig_libdir,
    subdirs: xpc66_dir,                  # not xpc66_project_base
    libraries: xpc66_library_build
@@ -245,12 +245,12 @@ pkg_mod.generate(
 
 if meson.is_subproject()
 
-   libxpc66_include_dep = declare_dependency(
-      include_directories : libxpc66_includedirs
+   libxpc66_include_dep = declare_dependency(      # maybe unnecessary
+      include_directories : libxpc66_includes
       )
 
    libxpc66_library_dep = declare_dependency(
-      include_directories : libxpc66_includedirs,
+      include_directories : libxpc66_includes,
       link_with : xpc66_library_build
       )
 
@@ -280,16 +280,18 @@ endif
 
 summary(
    {
-      'Date': xpc66_date,
-      'Filebase': xpc66_project_base,
-      'Version': xpc66_version,
-      'Base': xpc66_project_base,
-      'Description': xpc66_description,
-      'Root': xpc66_project_root,
-      'Sub Dir': xpc66_project_base,
-      'Build Type': xpc66_build_type,
-      'Library Type': xpc66_libtype,
-      'Subproject?': xpc66_subproj
+      'Date' : xpc66_info_date,
+      'Filebase' : xpc66_project_base,
+      'Version' : xpc66_pkg_version,
+      'Base' : xpc66_project_base,
+      'Description' : xpc66_pkg_description,
+      'Source Root' : xpc66_info_project_root,
+      'Headers Root' : libxpc66_include_top,
+      'Sub Dir' : xpc66_project_base,
+      'Build Type'  : xpc66_info_build_type,
+      'Build Root' : xpc66_info_build_root,
+      'Library Type' : xpc66_info_lib_type,
+      'Subproject?' : xpc66_subproj
    },
    section: 'Xpc66 Project'
    )
@@ -301,7 +303,6 @@ summary(
       'bindir': xpc66_bindir,
       'libdir': xpc66_libdir,
       'datadir': xpc66_datadir,
-      'appdatadir': xpc66_datadir,
       'docdir': xpc66_docdir
    },
    section: 'Xpc66 Install Directories'

@@ -24,14 +24,18 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-07-03
- * \updates       2022-11-16
+ * \updates       2024-04-24
  * \license       See above.
  *
  *  To do: add a help-line for each option.
  */
 
-#include <string>
-#include <cstdlib>                   /* EXIT_SUCCESS, EXIT_FAILURE       */
+#include <cstdlib>                  /* EXIT_SUCCESS, EXIT_FAILURE       */
+#include <iostream>                 /* std::cout, std::cerr             */
+#include <string>                   /* std::string                      */
+
+#include "xpc/shellexecute.hpp"     /* xpc::open_pdf() for linkage test */
+#include "xpc66.hpp"                /* xpc66_version() function         */
 
 /*
  * Explanation text.
@@ -44,6 +48,23 @@ static const std::string help_intro
 };
 
 /*
+ * Test of shellexecute functions. It assumes the test is being run
+ * from the project top-level directory.
+ */
+
+static bool
+test_shell_execution ()
+{
+    static std::string s_doc = "./doc/xpc66-library-guide.pdf";
+    bool result = xpc::open_pdf(s_doc);
+    if (! result)
+    {
+        std::cerr << "Failed to open '" << s_doc << "'" << std::endl;
+    }
+    return result;
+}
+
+/*
  * main() routine
  */
 
@@ -51,6 +72,13 @@ int
 main (int /*argc*/, char * /*argv*/ [])
 {
     int rcode = EXIT_FAILURE;
+    std::cout << "Test of " << xpc66_version() << ":" << std::endl;
+    if (test_shell_execution())
+    {
+        rcode = EXIT_SUCCESS;
+
+        // do more tests....
+    }
 #if 0
     xpc::cliparser clip(test_options);
     bool success = clip.parse(argc, argv);

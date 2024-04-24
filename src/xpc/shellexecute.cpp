@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-05-19
- * \updates       2024-04-17
+ * \updates       2024-04-24
  * \license       GNU GPLv2 or above
  *
  *  Provides support for cross-platform time-related functions.
@@ -33,7 +33,7 @@
 #include "xpc/shellexecute.hpp"         /* xpc::open_document(), etc.       */
 #include "utilfunctions.hpp"            /* xpc::file_error() etc.           */
 
-#if defined SEQ66_PLATFORM_WINDOWS
+#if defined PLATFORM_WINDOWS
 #include <windows.h>                    /* ShellExecute() [shellapi.h]      */
 #endif
 
@@ -83,7 +83,7 @@ open_pdf (const std::string & pdfspec)
     {
         cmd += " ";
         cmd += pdfspec;
-#if ! defined SEQ66_PLATFORM_WINDOWS
+#if ! defined PLATFORM_WINDOWS
         cmd += "&";
 #endif
         return command_line(cmd);
@@ -102,7 +102,7 @@ open_url (const std::string & url)
     {
         cmd += " ";
         cmd += url;
-#if ! defined SEQ66_PLATFORM_WINDOWS
+#if ! defined PLATFORM_WINDOWS
         cmd += "&";
 #endif
         return command_line(cmd);
@@ -120,7 +120,7 @@ open_local_url (const std::string & url)
     return open_url(url);
 }
 
-#if defined SEQ66_PLATFORM_UNIX         // LINUX
+#if defined PLATFORM_UNIX                   // LINUX
 
 bool
 open_document (const std::string & documentpath)
