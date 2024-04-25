@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2024-04-24
+# \updates     2024-04-25
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. It was part of the libs66
@@ -41,6 +41,11 @@ project('xpc66',
 #-----------------------------------------------------------------------------
 # Information for this sub-project.
 #-----------------------------------------------------------------------------
+#
+#  Tricky: the *.pc file must have a base name matching the name of the
+#  subproject *.wrap file.
+#
+#-----------------------------------------------------------------------------
 
 xpc66_pkg_description = 'Refactoring the base Seq66 OS-dependent modules.'
 xpc66_pkg_version = meson.project_version()
@@ -52,6 +57,7 @@ xpc66_info_lib_type = get_option('default_library')
 xpc66_info_project_root = meson.project_source_root()
 xpc66_debug = get_option('buildtype').contains('debug')
 xpc66_project_base = 'xpc66-@0@'.format(xpc66_api_version)
+xpc66_pkgconfig_name = 'libxpc66'
 xpc66_subproj = meson.is_subproject()
 
 if xpc66_debug
@@ -232,7 +238,7 @@ pkg_mod = import('pkgconfig')
 
 pkg_mod.generate(
    xpc66_library_build,
-   filebase : xpc66_project_base,
+   filebase : xpc66_pkgconfig_name,
    version : xpc66_pkg_version,
    name : xpc66_project_base,
    description : xpc66_pkg_description,
