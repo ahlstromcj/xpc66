@@ -206,7 +206,7 @@ empty_depends = [ ]
 xpc66_library_build = library(
    xpc66_project_base,
    libxpc66_sources,
-   install : true,
+   install : not xpc66_subproj,
    install_dir : xpc66_libdir,
    cpp_args : build_args,
    dependencies : empty_depends,
@@ -233,21 +233,25 @@ install_headers(libxpc66_headers, subdir : xpc66_dir, preserve_path : true)
 #-----------------------------------------------------------------------------
 # Package config
 #-----------------------------------------------------------------------------
-
-pkg_mod = import('pkgconfig')
-
-pkg_mod.generate(
-   xpc66_library_build,
-   filebase : xpc66_pkgconfig_name,
-   version : xpc66_pkg_version,
-   name : xpc66_project_base,
-   description : xpc66_pkg_description,
-   install_dir : alt_pkgconfig_libdir,
-   subdirs : xpc66_dir,                  # not xpc66_project_base
-   libraries : xpc66_library_build
-   )
+#  On Arch Linux, the .pc file is installed to /usr/local/lib/pkgconfig.
+#  On Ubuntu, the .pc file is installed to
+#     /usr/local/lib/x86_64-linux-gnu/pkgconfig.
+#-----------------------------------------------------------------------------
 
 if not xpc66_subproj
+
+   pkg_mod = import('pkgconfig')
+   pkg_mod.generate(
+      xpc66_library_build,
+      filebase : xpc66_pkgconfig_name,
+      version : xpc66_pkg_version,
+      name : xpc66_project_base,
+      description : xpc66_pkg_description,
+      install_dir : alt_pkgconfig_libdir,
+      subdirs : xpc66_dir,
+      libraries : xpc66_library_build,
+      url : 'https://github.com/ahlstromcj/cfg66',
+      )
 
 # TODO: figure out where to put and install the logo
 
