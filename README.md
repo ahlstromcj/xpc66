@@ -1,7 +1,4 @@
-# README for Library Xpc66 0.1.0
-
-Chris Ahlstrom
-2022-07-03 to 2024-04-17
+# README for Library Xpc66 0.1.1 2024-04-26
 
 __Xpc66__ is a cross-platform utilities library based on the "util" and "os"
 directories of the __Seq66__ project, but that is useful in other applications.
@@ -14,6 +11,13 @@ Support sites (still in progress):
 
 # Major Features
 
+    Note that a work.sh script is provided to simplify or clarify various
+    operations such as cleaning, building, making a release, and installing
+    or uninstalling the library.
+
+##  Library Features
+
+    *   Can be built using GNU C++ or Clang C++.
     *   C++ recursive mutex and synchronization support.
     *   Utilites for daemonizing a C++ application, rerouting standard
         I/O, and generic signalling of session changes. Partly based
@@ -22,21 +26,39 @@ Support sites (still in progress):
     *   Functions for executing command lines and displaying URLs or
         PDFs in Linux/UNIX and Windows.
     *   Functions for measuring time and "sleeping".
-    *   PDF documentation built from LaTex.
     *   Basic dependencies: Meson 1.1 and above; C++14 and above.
+    *   The build system is Meson, and sample wrap files are provided
+        for using Xpc66 as a C++ subproject.
+    *   PDF documentation built from LaTeX.
 
-##  Additional Features (in progress)
+##  Code
 
-    *   To do. Beef up testing and the LaTeX documentation; use as a
-        Meson subproject.
-
-##  Internal
-
+    *   The code is a mix of hard-core C++ and C-like functions.
+    *   The C++ STL and advanced language features are used as much as
+    *   possible
+    *   C++14 is required for some of its features.
+    *   The GNU and Clang C++ compilers are supported.
     *   Broken into modules for easier maintenance.
+
+##  Fixes
+
+    *   Improved the work.sh, added an --uninstall option.
+
+##  Documentation
+
+    *   A PDF developers guide is in progress.
+
+## To Do
+
+    *   Beef up testing; it is currently minimal.
+    *   Beef up the LaTeX documentation.
 
 ## Recent Changes
 
     *   Version 0.1.0:
         *   Usage of meson instead of autotools or cmake.
+    *   Version 0.1.1:
+        *   Many fixes to Meson files and the build script.
+        *   Improvements in use as a Meson subproject.
 
 // vim: sw=4 ts=4 wm=2 et ft=markdown

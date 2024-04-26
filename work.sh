@@ -34,10 +34,11 @@ export XPC66_SCRIPT_EDIT_DATE="2024-04-26"
 export XPC66_LIBRARY_API_VERSION="0.1"
 export XPC66_LIBRARY_VERSION="$XPC66_LIBRARY_API_VERSION.0"
 export XPC66="xpc66"
-export XPC66_LIBRARY="$XPC66-0.1"
+export XPC66_LIBRARY="$XPC66-XPC66_LIBRARY_API_VERSION"
 
 PLATFORM="UNIX"
-INSTALL_PREFIX="/usr/local"
+INSTALL_PREFIX="/usr/local"         # "/usr", what about Windows?
+INSTALL_LIBDIR="lib"                # "lib/x86_64-linux-gnu" on Debian
 
 DOCLANG="no"         # --clang. Default is the native compiler.
 DOGNU="no"           # --gnu. Default is the native compiler.
@@ -49,9 +50,9 @@ DOINSTALL="no"       # --install. Requires the release be built already.
 DOUNINSTALL="no"     # --uninstall. Like --install, requires sudo/root.
 DOMAKE="yes"         # Default action after creating the build directory.
 DOREMAKE="no"        # currently UNUSED
-DOMAKEPDF="no"       # --pdf. Make the manual, a separate step, NOT READY.
+DOMAKEPDF="no"       # --pdf. Make the manual, always as a separate step.
 DOPACK="no"          # --pack. Clean and create a tar-file.
-DORELEASE="no"       # --release. as opposed to debug; also PDF made
+DORELEASE="no"       # --release. as opposed to debug; also PDF is made.
 DOSTATIC="yes"       # --static
 DOVERSION="no"       # --version. Duouble duh!
 EXTRAFLAGS=""
@@ -241,7 +242,7 @@ if test $DOCLEAN = "yes" ; then
    rm -f doc/dox/*.log
    rm -f doc/latex/*.log
    echo "Build products removed from the xpc66/build directory."
-#  git checkout doc/xpc66-developer-guide.pdf
+   git checkout doc/xpc66-developer-guide.pdf
    echo "Previous version of developer guide restored."
 fi
 
@@ -408,7 +409,7 @@ if test "$DOUNINSTALL" = "yes" ; then
       ninja -C build uninstall
       if test "$PLATFORM" = "UNIX" ; then
          rm -rf "$INSTALL_PREFIX/include/$XPC66_LIBRARY"
-         rm -rf "$INSTALL_PREFIX/lib/$XPC66_LIBRARY"
+         rm -rf "$INSTALL_PREFIX/$INSTALL_LIBDIR/$POTEXT_LIBRARY"
          rm -rf "$INSTALL_PREFIX/share/doc/$XPC66"
 #        rm -rf "$INSTALL_PREFIX/man/man1/$XPC66.1"
       fi
