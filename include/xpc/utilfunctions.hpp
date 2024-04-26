@@ -20,7 +20,7 @@
  */
 
 /**
- * \file          utilfuncttions.hpp
+ * \file          utilfunctions.hpp
  *
  *    This module provides macros for generating simple messages, MIDI
  *    parameters, and more.
@@ -28,14 +28,14 @@
  * \library       xpc66
  * \author        Chris Ahlstrom and other authors; see documentation
  * \date          2024-04-15
- * \updates       2024-04-17
+ * \updates       2024-04-26
  * \version       $Revision$
  * \license       GNU GPL v2 or above
  *
  *  This file defines functions for C++11 (or greater) code.  Near duplicates
  *  of a few functions from the cfg66 library, defined here to keep xpc66 and
- *  cfg66 independent.  These items were extracted from Seq66's C++
- *  basic_macros module.
+ *  cfg66 independent of each other .  These items were extracted from Seq66's
+ *  C++ basic_macros, filefunctions, and strfunctions  modules.
  */
 
 #include "cpp_types.hpp"                /* string, vector, msglevel         */
@@ -79,7 +79,7 @@ extern std::wstring widen_string (const std::string & source);
 #endif          // XPC66_XPC_UTILFUNCTIONS_HPP
 
 /*
- * utilfuncttions.hpp
+ * utilfunctions.hpp
  *
  * vim: sw=4 ts=4 wm=4 et ft=cpp
  */

@@ -29,7 +29,7 @@
  * \license       GNU GPLv2 or above
  *
  *  Near duplicates of a few functions from the cfg66 library, defined here
- *  to keep xpc66 and cfg66 independent.
+ *  to keep xpc66 and cfg66 independent of each other.
  *
  *  An application should consider linking to the cfg66 library and use
  *  its version of these functions (in the util namespace).

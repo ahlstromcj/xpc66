@@ -8,7 +8,7 @@
 # \library        xpc66
 # \author         Chris Ahlstrom
 # \date           2024-02-06
-# \update         2024-04-17
+# \update         2024-04-26
 # \version        $Revision$
 # \license        $XPC_SUITE_GPL_LICENSE$
 #
@@ -30,10 +30,14 @@ LANG=C
 export LANG
 CYGWIN=binmode
 export CYGWIN
-export CFG66_SCRIPT_EDIT_DATE="2024-04-17"
-export CFG66_LIBRARY_API_VERSION="0.1"
-export CFG66_LIBRARY_VERSION="$CFG66_LIBRARY_API_VERSION.0"
-export CFG66="xpc66"
+export XPC66_SCRIPT_EDIT_DATE="2024-04-26"
+export XPC66_LIBRARY_API_VERSION="0.1"
+export XPC66_LIBRARY_VERSION="$XPC66_LIBRARY_API_VERSION.0"
+export XPC66="xpc66"
+export XPC66_LIBRARY="$XPC66-0.1"
+
+PLATFORM="UNIX"
+INSTALL_PREFIX="/usr/local"
 
 DOCLANG="no"         # --clang. Default is the native compiler.
 DOGNU="no"           # --gnu. Default is the native compiler.
@@ -41,7 +45,8 @@ DOCLEAN="no"         # --clean
 DODEBUG="yes"        # --debug. This is the default Meson build.
 DODIST="no"          # --dist. Use Meson "dist" to create a package.
 DOHELP="no"          # --help. Duh!
-DOINSTALL="no"       # --install. Requires the build be done already.
+DOINSTALL="no"       # --install. Requires the release be built already.
+DOUNINSTALL="no"     # --uninstall. Like --install, requires sudo/root.
 DOMAKE="yes"         # Default action after creating the build directory.
 DOREMAKE="no"        # currently UNUSED
 DOMAKEPDF="no"       # --pdf. Make the manual, a separate step, NOT READY.
@@ -87,6 +92,11 @@ if test $# -ge 1 ; then
 
          --install)
             DOINSTALL="yes"
+            DOMAKE="no"
+            ;;
+
+         --uninstall)
+            DOUNINSTALL="yes"
             DOMAKE="no"
             ;;
 
@@ -149,7 +159,7 @@ fi
 #------------------------------------------------------------------------------
 
 if test "$DOVERSION" = "yes" ; then
-   echo "Potext version $CFG66_LIBRARY_VERSION $CFG66_SCRIPT_EDIT_DATE"
+   echo "Potext version $XPC66_LIBRARY_VERSION $XPC66_SCRIPT_EDIT_DATE"
    exit 0
 fi
 
@@ -160,16 +170,19 @@ fi
 if test "$DOHELP" = "yes" ; then
 
    cat << E_O_F
-Usage: ./work [options]    ($CFG66_LIBRARY_VERSION-$CFG66_SCRIPT_EDIT_DATE)
+Usage: ./work [options]    ($XPC66_LIBRARY_VERSION-$XPC66_SCRIPT_EDIT_DATE)
 
 'work' encapsulates some common operations involving Meson, builds, packing,
 and version information.  Only implemented options are shown here; there will
-be more to come.
+be more to come. Some options might not work on Windows.
 
  --make or --build   Build the code in 'build'. The default operation.
  --release           Build release version (Meson defaults to a debug version).
                      Also builds the PDF documentation.
  --install           Run 'meson install' to install the library and PDF.
+ --uninstall         Run 'ninja uninstall' to uninstall the library.
+                     Some directories might remain; there is a error about
+                     one header file not being found... strange.
  --dist              Make a Meson dist package and exit.
  --clang             Rebuild the code using the Clang compilers.
  --pdf               Build just the PDF documentation and exit. In progress.
@@ -283,7 +296,7 @@ if test $DOPACK = "yes" ; then
       echo "  Are you running pack from the proper directory?"
       echo "  That is what you must do."
    fi
-   cd $CFG66
+   cd $XPC66
 
 fi
 
@@ -355,7 +368,8 @@ if test "$DOMAKE" = "yes" ; then
 fi
 
 # Check for root, then install. We could let meson prompt the user
-# to automatically become root.
+# to automatically become root. Note that there are two possible locations
+# for the library and pkgconfig to be installed on Linux:
 #
 #     -  /usr/local/lib/
 #     -  /usr/local/lib/x86_64-linux-gnu/
@@ -370,6 +384,36 @@ if test "$DOINSTALL" = "yes" ; then
       cd ..
    else
       echo "We want you to be root to install the xpc66 library..."
+   fi
+
+fi
+
+# Uninstallation is odd with Meson. The following does not work. And
+# the call to ninja does not remove some directories.
+#
+#     cd build
+#     meson --internal uninstall
+#     cd ..
+#
+# Note that there are no man pages yet.
+#
+# We could 
+
+
+if test "$DOUNINSTALL" = "yes" ; then
+
+   USERID=$(id -u)
+   if test "$USERID" = 0 ; then
+      echo "Uninstalling the cfg66 library..."
+      ninja -C build uninstall
+      if test "$PLATFORM" = "UNIX" ; then
+         rm -rf "$INSTALL_PREFIX/include/$XPC66_LIBRARY"
+         rm -rf "$INSTALL_PREFIX/lib/$XPC66_LIBRARY"
+         rm -rf "$INSTALL_PREFIX/share/doc/$XPC66"
+#        rm -rf "$INSTALL_PREFIX/man/man1/$XPC66.1"
+      fi
+   else
+      echo "UID $USERID. We want you as root to uninstall the cfg66 library..."
    fi
 
 fi

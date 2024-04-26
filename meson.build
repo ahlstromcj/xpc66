@@ -105,7 +105,7 @@ libxpc66_sources = []
 build_args = []
 
 #-----------------------------------------------------------------------------
-# Unlike the cfg66 library, this library will have platform-dependent
+# Unlike the cfg66 library, this library has platform-dependent
 # characteristics.
 #-----------------------------------------------------------------------------
 
@@ -250,7 +250,7 @@ if not xpc66_subproj
       install_dir : alt_pkgconfig_libdir,
       subdirs : xpc66_dir,
       libraries : xpc66_library_build,
-      url : 'https://github.com/ahlstromcj/cfg66',
+      url : 'https://github.com/ahlstromcj/xpc66',
       )
 
 # TODO: figure out where to put and install the logo
