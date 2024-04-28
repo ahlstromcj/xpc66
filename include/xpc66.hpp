@@ -27,7 +27,7 @@
  * \library       Any application or library
  * \author        Chris Ahlstrom
  * \date          2024-04-15
- * \updates       2024-04-15
+ * \updates       2024-04-28
  * \license       GNU GPL v2 or above
  *
  */
@@ -46,7 +46,7 @@
  *  Free functions.
  */
 
-extern std::string xpc66_version ();
+extern const std::string & xpc66_version () noexcept;
 
 #endif          // defined __cplusplus
 

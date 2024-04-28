@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2005-07-03 to 2007-08-21 (pre-Sequencer24/64)
- * \updates       2024-02-28
+ * \updates       2024-04-28
  * \license       GNU GPLv2 or above
  *
  *  Daemonization module of the POSIX C Wrapper (PSXC) library
@@ -85,12 +85,17 @@
 
 #include "c_macros.h"                   /* errprint()                       */
 #include "platform_macros.h"            /* detects the build platform       */
+#include "xpc66-config.h"               /* the XPC66_HAVE macros            */
 #include "xpc/daemonize.hpp"            /* daemonization functions & macros */
 #include "xpc/utilfunctions.hpp"        /* xpc::file_error() etc.           */
 
 #if defined PLATFORM_UNIX               // PLATFORM_LINUX
 
+#if XPC66_HAVE_FCNTL_H                  /* xcp-config.h.in                  */
 #include <fcntl.h>                      /* O_RDWR flag                      */
+#else
+#error The daemonize module requires fcntl.h
+#endif
 #include <signal.h>                     /* struct sigaction                 */
 #include <sys/stat.h>                   /* umask(), etc.                    */
 #include <syslog.h>                     /* syslog() and related constants   */
@@ -117,7 +122,11 @@
  */
 
 #include <windows.h>                    /* WaitForSingleObject(), INFINITE  */
+#if XPC66_HAVE_FCNTL_H                  /* xcp-config.h.in                  */
 #include <fcntl.h>                      /* _O_RDWR                          */
+#else
+#error The daemonize module requires fcntl.h
+#endif
 #include <io.h>                         /* _open(), _close()                */
 #include <process.h>                    /* Windows _getpid() function       */
 #include <synchapi.h>                   /* recent Windows "wait" functions  */

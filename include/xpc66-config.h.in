@@ -28,17 +28,38 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-07-03
- * \updates       2022-11-16
+ * \updates       2024-04-28
  * \license       GNU GPL v2 or above
  *
- *      For information on this file, see
+ *  This file is used mainly for system files and specific build options.  The
+ *  main build options are detected at build time via the platform_macros.h
+ *  module.
  *
- *          https://mesonbuild.com/Configuration.html
+ *  For information on this file, see
+ *
+ *      https://mesonbuild.com/Configuration.html
+ *
+ *  These #defines will define the macro value as True or False.
+ *  The proper way to test the macro is:
+ *
+ *      #if RTL66_HAVE_SEMAPHORE_H
+ *
+ *  We had an error on Arch Linux with "True" apparently not being detected as
+ *  a boolean, so we add setting up True/False below. We should perhaps
+ *  update this file to better match the descriptions at the URL above.
  */
 
-#define HAVE_FCNTL_H            @fcntl_h@
-#define HAVE_LIMITS_H           @limits_h@
-#define HAVE_LINUX_LIMITS_H     @limits_h@
+#if ! defined True
+#define True    1
+#endif
+
+#if ! defined False
+#define False   0
+#endif
+
+#define XPC66_HAVE_FCNTL_H          @fcntl_h@
+#define XPC66_HAVE_LIMITS_H         @limits_h@
+#define XPC66_HAVE_LINUX_LIMITS_H   @limits_h@
 
 #endif          // XPC66_CONFIG_H
 

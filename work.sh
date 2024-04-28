@@ -8,7 +8,7 @@
 # \library        xpc66
 # \author         Chris Ahlstrom
 # \date           2024-02-06
-# \update         2024-04-26
+# \update         2024-04-28
 # \version        $Revision$
 # \license        $XPC_SUITE_GPL_LICENSE$
 #
@@ -30,7 +30,7 @@ LANG=C
 export LANG
 CYGWIN=binmode
 export CYGWIN
-export XPC66_SCRIPT_EDIT_DATE="2024-04-26"
+export XPC66_SCRIPT_EDIT_DATE="2024-04-28"
 export XPC66_LIBRARY_API_VERSION="0.1"
 export XPC66_LIBRARY_VERSION="$XPC66_LIBRARY_API_VERSION.0"
 export XPC66="xpc66"
@@ -188,7 +188,7 @@ be more to come. Some options might not work on Windows.
  --clang             Rebuild the code using the Clang compilers.
  --pdf               Build just the PDF documentation and exit. In progress.
  --clean             Delete the usual derived files from the project. Also
-                     do "git checkout doc/xpc66-developer-guide.pdf"
+                     do "git checkout doc/xpc66-library-guide.pdf"
  --pack [ tag ]      A simple quick packaging of the code; the tag goes
                      into the tarball name.
  --help              Show this help text.
@@ -242,8 +242,8 @@ if test $DOCLEAN = "yes" ; then
    rm -f doc/dox/*.log
    rm -f doc/latex/*.log
    echo "Build products removed from the xpc66/build directory."
-   git checkout doc/xpc66-developer-guide.pdf
-   echo "Previous version of developer guide restored."
+   git checkout doc/xpc66-library-guide.pdf
+   echo "Previous version of library guide restored."
 fi
 
 # This is just a quick pack, with date and branch information added.

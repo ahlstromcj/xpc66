@@ -1,8 +1,8 @@
-INSTALL for Cfg66 v. 0.1.0 and above
+INSTALL for Xpc66 v. 0.1.0 and above
 Chris Ahlstrom
-2024-04-15 to 2024-04-15
+2024-04-15 to 2024-04-28
 
-Meson is the build system for the Cfg66 library. Meson 1.1 and above is
+Meson is the build system for the Xpc66 library. Meson 1.1 and above is
 required. The 'meson.options' file replaces 'meson_options.txt'.
 
 In order to simplify life, a POSIX shell script, 'work.sh', is provided.
@@ -42,8 +42,8 @@ Install:
 
 Subproject:
 
-    If one does not want to install Cfg66, Meson '*.wrap' files are
-    provided to use Cfg66 as a Meson subproject.
+    If one does not want to install Xpc66, Meson '*.wrap' files are
+    provided to use Xpc66 as a Meson subproject.
 
     See extras/wraps/potext-git.wrap in particular.
 
@@ -53,12 +53,6 @@ Subproject:
         into 'subprojects'.
     -   Build!
 
-    An example is included: copy the file extras/code/mini-potext-test.tar.xz
-    to a safe place (such as a temp directory). In that directory, do:
-
-        $ tar xf mini-potext-test.tar.xz
-        $ cd hellopotext
-
 Build tools:
 
     -   C/C++ compiler. On Linux etc., the GNU and Clang compilers are
@@ -66,7 +60,7 @@ Build tools:
     -   Python.
     -   Meson and Ninja. In Windows, they can be installed from
         the same Meson release '*.msi' file.
-    -   C++17 and above is required to build Cfg66. The GNU and Clang
+    -   C++17 and above is required to build Xpc66. The GNU and Clang
         compilers support it.
 
 # vim: sw=4 ts=4 wm=4 et ft=sh
