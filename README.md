@@ -1,4 +1,4 @@
-# README for Library Xpc66 0.1.1 2024-04-26
+# README for Library Xpc66 0.1.1 2024-04-30
 
 __Xpc66__ is a cross-platform utilities library based on the "util" and "os"
 directories of the __Seq66__ project, but that is useful in other applications.
@@ -60,5 +60,6 @@ Support sites (still in progress):
     *   Version 0.1.1:
         *   Many fixes to Meson files and the build script.
         *   Improvements in use as a Meson subproject.
+        *   Moved msglevel and tokenization into "lib66" namespace.
 
 // vim: sw=4 ts=4 wm=2 et ft=markdown

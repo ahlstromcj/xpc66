@@ -27,7 +27,7 @@
  * \library       Any application or library
  * \author        Chris Ahlstrom
  * \date          2022-07-01
- * \updates       2024-04-26
+ * \updates       2024-04-30
  * \license       GNU GPL v2 or above
  *
  *  This file defines a minimal set of convenience macros for both C and C++11
@@ -38,15 +38,17 @@
 
 #if defined __cplusplus
 
-/*
- * namespace xyz
- *
- *      This module currently defines no namespace as it is common (and
- *      copied) in many "66" libraries.
- */
-
 #include <string>                       /* std::string class                */
 #include <vector>                       /* std::vector class                */
+
+/*
+ *  Helps to hide our definitions. If necessary, can also be applied to
+ *  existing namespace like cfg, util, etc. For now, there's no need for
+ *  that.
+ */
+
+namespace lib66
+{
 
 /**
  *  A kind of tribool, it adds a "toggle" option. Better than sending
@@ -58,6 +60,37 @@ enum class toggler
     off,                /**< A request to turn a state boolean to false.    */
     on,                 /**< A request to turn a state boolean to true.     */
     flip                /**< A request to toggle a state boolean.           */
+};
+
+/**
+ *  A visible representation of how to handle a function that can
+ *  modify something. Taken from performer::change.
+ *
+ *  "recreate" value is a stronger form of "yes", and additionally
+ *  requests that key elements of the notified object need to be
+ *  recreated.
+ */
+
+enum class change
+{
+    no,             /**< Do not set a modify-flag.                    */
+    yes,            /**< Do set a modify-flag.                        */
+    recreate,       /**< Recreate the user-interface(s).                */
+    removed,        /**< Change was a removal; more specific than yes.  */
+    signal,         /**< Could alter the UI from a different thread.    */
+    max
+};
+
+/**
+ *  Indicates how to notify other parts of a program when a change
+ *  has occurred.
+ */
+
+enum class notification
+{
+    no,             /**< Do not notify concerning a change.                 */
+    yes,            /**< Do set a modify-flag.                        */
+    max
 };
 
 /**
@@ -92,7 +125,9 @@ enum class msglevel
 
 using tokenization = std::vector<std::string>;
 
-#endif
+}               // namespace lib66
+
+#endif          // __cplusplus
 
 #endif          // CPP_TYPES_HPP
 

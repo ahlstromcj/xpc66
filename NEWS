@@ -1,31 +1,36 @@
-NEWS for Cfg66 0.1.0
+NEWS for Xpc66 0.1.1
 Chris Ahlstrom
-2024-04-15 to 2024-04-15
+2024-04-15 to 2024-04-30
 
 # Changelog
 
-## [0.1.0] - 2024-04-15
+## [0.1.1] - 2024-04-30
 
 ### Added
 
-- Added ...
+- No significant added code.
 
 ### Fixed
 
-- Errors in ...
+- The HAVE macros were updated.
+- Cfg66 can now be used as a sub-project.
+- Fixed the build dependencies and build setup.
 
 ### Changed
 
-- Moved some ...
+- The HAVE macros were updated.
+- Updated the cfg66.wrap file.
+- Added --install and --uninstall options to work.sh. The latter is not
+  completely effective at removing all installed files, however.
+- Renamed the .pc file to libcfg66.pc.
 
 ### Removed
 
 - Minor cleanup.
 
+For future usage:
+
 ## [Unreleased]
-
-    To do.
-
 ### Added
 ### Fixed
 ### Changed
