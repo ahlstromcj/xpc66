@@ -1,0 +1,27 @@
+#----------------------------------------------------------------------------
+#
+# Lib66 Library Wrapper
+# Chris Ahlstrom
+# 2025-01-30 to 2025-01-31
+#
+#   Lib66 wrapper for GitHub repository
+#
+#   When finished, replace 'wip' with 'head':
+#
+#----------------------------------------------------------------------------
+
+[wrap-git]
+
+url = https://github.com/ahlstromcj/lib66.git
+revision = head
+depth = 1
+
+[provide]
+
+#----------------------------------------------------------------------------
+# This dependency is declared in lib66/meson.build.
+#----------------------------------------------------------------------------
+
+liblib66_library = liblib66_dep
+
+# vim: ft=dosini

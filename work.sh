@@ -8,7 +8,7 @@
 # \library        xpc66
 # \author         Chris Ahlstrom
 # \date           2024-02-06
-# \update         2024-04-28
+# \update         2025-01-31
 # \version        $Revision$
 # \license        $XPC_SUITE_GPL_LICENSE$
 #
@@ -30,8 +30,8 @@ LANG=C
 export LANG
 CYGWIN=binmode
 export CYGWIN
-export XPC66_SCRIPT_EDIT_DATE="2024-04-28"
-export XPC66_LIBRARY_API_VERSION="0.1"
+export XPC66_SCRIPT_EDIT_DATE="2025-01-31"
+export XPC66_LIBRARY_API_VERSION="0.2"
 export XPC66_LIBRARY_VERSION="$XPC66_LIBRARY_API_VERSION.0"
 export XPC66="xpc66"
 export XPC66_LIBRARY="$XPC66-XPC66_LIBRARY_API_VERSION"
@@ -48,9 +48,11 @@ DODIST="no"          # --dist. Use Meson "dist" to create a package.
 DOHELP="no"          # --help. Duh!
 DOINSTALL="no"       # --install. Requires the release be built already.
 DOUNINSTALL="no"     # --uninstall. Like --install, requires sudo/root.
+DOUPDATE="no"        # --update. Force a subproject update.
 DOMAKE="yes"         # Default action after creating the build directory.
 DOREMAKE="no"        # currently UNUSED
 DOMAKEPDF="no"       # --pdf. Make the manual, always as a separate step.
+DOPOTEXT="no"
 DOPACK="no"          # --pack. Clean and create a tar-file.
 DORELEASE="no"       # --release. as opposed to debug; also PDF is made.
 DOSTATIC="yes"       # --static
@@ -87,8 +89,18 @@ if test $# -ge 1 ; then
             DOMAKE="no"
             ;;
 
+         --update)
+            DOUPDATE="yes"
+            DOMAKE="no"
+            ;;
+
          --build | --make)
             DOMAKE="yes"
+            ;;
+
+         --potext)
+            DOMAKE="yes"
+            DOPOTEXT="yes"
             ;;
 
          --install)
@@ -178,6 +190,8 @@ and version information.  Only implemented options are shown here; there will
 be more to come. Some options might not work on Windows.
 
  --make or --build   Build the code in 'build'. The default operation.
+ --update            Force an update of the subprojects.
+ --potext            Build with Potext (light gettext) library sypport.
  --release           Build release version (Meson defaults to a debug version).
                      Also builds the PDF documentation.
  --install           Run 'meson install' to install the library and PDF.
@@ -228,6 +242,7 @@ if test $DOCLEAN = "yes" ; then
    rm -rf build/include/
    rm -rf build/latex/
    rm -rf build/src/
+   rm -rf build/subprojects/
    rm -rf build/tests/
    rm -rf build/meson*
    rm -rf build/lib*
@@ -239,11 +254,18 @@ if test $DOCLEAN = "yes" ; then
    rm -f $MAKEFILE
    rm -f build/compile_commands.json
    rm -rf wipe/
+   rm -rf subprojects/liblib66/
+   rm -rf subprojects/potext
    rm -f doc/dox/*.log
    rm -f doc/latex/*.log
    echo "Build products removed from the xpc66/build directory."
    git checkout doc/xpc66-library-guide.pdf
    echo "Previous version of library guide restored."
+# Problematic when making a release. Just remember to do it.
+#  rm -f doc/latex/*.log
+#  echo "Build products removed from the cfg66/build directory."
+#  git checkout doc/cfg66-library-guide.pdf tests/data/fooout.rc
+#  echo "Previous version of developer guide restored."
 fi
 
 # This is just a quick pack, with date and branch information added.
@@ -301,6 +323,10 @@ if test $DOPACK = "yes" ; then
 
 fi
 
+if test "$DOUPDATE" = "yes" ; then
+   meson subprojects update
+fi
+
 if test "$DOMAKE" = "yes" ; then
 
 # TODO: use a separate build directory for Clang.
@@ -308,6 +334,11 @@ if test "$DOMAKE" = "yes" ; then
 # $ CC=clang CXX=clang++ meson setup buildclang
 #
 # https://mesonbuild.com/Running-Meson.html
+
+   POTEXTDEF=""
+   if test "$DOPOTEXT" = "yes" ; then
+   POTEXTDEF="-Dpotext=true"
+   fi
 
    if test "$DOCLANG" = "yes" ; then
       echo "Using the Clang C/C++ compilers..."
@@ -348,6 +379,10 @@ if test "$DOMAKE" = "yes" ; then
 
    # Could also run "meson compile" here.  The --verbose option is not
    # present on older ninjas, so we use -v here.
+   #
+   # Can't add this at the end, it seems to break ninja's error detection.
+   #
+   # echo "# vim: ft=sh" >> make.log
 
    cd build
    ninja -v > make.log

@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2024-04-25
+# \updates     2025-01-31
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. It was part of the libs66
@@ -29,7 +29,7 @@
 
 project('xpc66',
    [ 'c', 'cpp' ],
-   version : '0.1.1',
+   version : '0.2.0',
    license : 'GPLv3',
    meson_version : '>=1.1.0',
    default_options : [
@@ -37,6 +37,18 @@ project('xpc66',
       'default_library=both'
       ]
    )
+
+#-----------------------------------------------------------------------------
+# Conditional enabling of the Potext translation library.
+#-----------------------------------------------------------------------------
+
+xpc66_use_potext = false
+if get_option('potext')
+
+   xpc66_use_potext = true
+   add_project_arguments('-DXPC66_USE_POTEXT', language : [ 'c', 'cpp' ])
+
+endif
 
 #-----------------------------------------------------------------------------
 # Information for this sub-project.
@@ -49,8 +61,8 @@ project('xpc66',
 
 xpc66_pkg_description = 'Refactoring the base Seq66 OS-dependent modules.'
 xpc66_pkg_version = meson.project_version()
-xpc66_api_version = '0.1'
-xpc66_info_date = '2024-04-24'
+xpc66_api_version = '0.2'
+xpc66_info_date = '2025-01-30'
 xpc66_info_build_type = get_option('buildtype')
 xpc66_info_build_root = meson.project_build_root()
 xpc66_info_lib_type = get_option('default_library')
@@ -167,6 +179,22 @@ cdata.set('fcntl_h', cc.has_header('fcntl.h'))
 cdata.set('limits_h', cc.has_header('limits.h'))
 
 #-----------------------------------------------------------------------------
+# Potential sub-projects
+#-----------------------------------------------------------------------------
+
+if xpc66_use_potext
+
+   libpotext_library_dep = dependency(
+      'libpotext', fallback : [ 'libpotext', 'libpotext_dep' ]
+      )
+
+endif
+
+liblib66_library_dep = dependency(
+   'liblib66', fallback : [ 'liblib66', 'liblib66_dep' ]
+   )
+
+#-----------------------------------------------------------------------------
 # Sub-directories. 'tests' has to be descended into later.
 #-----------------------------------------------------------------------------
 
@@ -203,15 +231,33 @@ empty_depends = [ ]
 #
 #-----------------------------------------------------------------------------
 
-xpc66_library_build = library(
-   xpc66_project_base,
-   libxpc66_sources,
-   install : not xpc66_subproj,
-   install_dir : xpc66_libdir,
-   cpp_args : build_args,
-   dependencies : empty_depends,
-   include_directories : [ libxpc66_includes ]
-   )
+if xpc66_use_potext
+
+   xpc66_library_build = library(
+      xpc66_project_base,
+      libxpc66_sources,
+      install : not xpc66_subproj,
+      install_dir : xpc66_libdir,
+      c_args : build_args,
+      cpp_args : build_args,
+      dependencies : [ liblib66_library_dep, libpotext_library_dep ],
+      include_directories : [ libxpc66_includes ]
+      )
+
+else
+
+   xpc66_library_build = library(
+      xpc66_project_base,
+      libxpc66_sources,
+      install : not xpc66_subproj,
+      install_dir : xpc66_libdir,
+      c_args : build_args,
+      cpp_args : build_args,
+      dependencies : [ liblib66_library_dep ],
+      include_directories : [ libxpc66_includes ]
+      )
+
+endif
 
 #-----------------------------------------------------------------------------
 # Make this library usable as a Meson subproject.  This allows a subproject to

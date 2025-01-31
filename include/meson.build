@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2024-04-24
+# \updates     2025-01-31
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. See the top-level meson.build
@@ -20,12 +20,7 @@
 #-----------------------------------------------------------------------------
 
 libxpc66_headers += files(
-   'c_macros.h',
-   'cpp_types.hpp',
-   'platform_macros.h',
    'xpc66.hpp',
-   'xpc_build_macros.h',
-   'xpc_build_macros.h',
    'xpc/automutex.hpp',
    'xpc/condition.hpp',
    'xpc/daemonize.hpp',

@@ -28,7 +28,7 @@
  * \library       xpc66 application
  * \author        Chris Ahlstrom
  * \date          2022-09-19
- * \updates       2022-11-23
+ * \updates       2025-01-31
  * \license       GNU GPLv2 or above
  */
 
@@ -36,7 +36,7 @@
 #include <sys/types.h>
 #include <vector>
 
-#include "xpc_build_macros.h"           /* PLATFORM_DEBUG macro, etc.       */
+#include "lib_build_macros.h"           /* PLATFORM_DEBUG macro, etc.       */
 
 #undef  XPC66_USE_MEMORY_LOCK           /* TODO: needs a lot of work !      */
 
