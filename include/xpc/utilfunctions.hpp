@@ -48,7 +48,7 @@ namespace xpc
 {
 
 /*
- *  Free functions in the xpd namespace.
+ *  Free functions in the xpc namespace.
  */
 
 extern bool warn_message
