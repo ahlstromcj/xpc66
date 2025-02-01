@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-05-19
- * \updates       2024-04-24
+ * \updates       2025-02-01
  * \license       GNU GPLv2 or above
  *
  *  Provides support for cross-platform time-related functions.
@@ -197,6 +197,15 @@ open_document (const std::string & documentpath)
     bool result = ! documentpath.empty();
     if (result)
     {
+#if defined PLATFORM_WINDOWS_32
+        std::string op = "open";
+        std::string path = documentpath;
+        HINSTANCE rc = ::ShellExecute
+        (
+            NULL, op.c_str(), path.c_str(), NULL, NULL, SW_SHOW
+        );
+        result = uintptr_t(rc) > 32;
+#else
         std::wstring op = widen_string("open");
         std::wstring path = widen_string(documentpath);
         HINSTANCE rc = ::ShellExecute
@@ -204,6 +213,7 @@ open_document (const std::string & documentpath)
             NULL, op.c_str(), path.c_str(), NULL, NULL, SW_SHOW
         );
         result = uintptr_t(rc) > 32;
+#endif
         if (! result)
             (void) file_error("Command failed", documentpath);
     }
