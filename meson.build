@@ -122,6 +122,7 @@ build_args = []
 #-----------------------------------------------------------------------------
 
 os_unix   = false
+os_freebsd  = false
 os_linux  = false
 os_win32  = false
 os_darwin = false
@@ -132,6 +133,8 @@ elif host_machine.system() == 'windows'
    os_win32 = true
 elif host_machine.system() == 'linux'
    os_linux = true
+elif host_machine.system() == 'freebsd'
+   os_freebsd = true
 endif
 
 os_unix = not os_win32
@@ -141,7 +144,7 @@ os_unix = not os_win32
 # We prefer to use the style '#include "cfg/header.hpp".
 #-----------------------------------------------------------------------------
 
-libxpc66_includes = include_directories('.',    # libxpc66_include_top,
+libxpc66_includes = include_directories('.',
    'include',
    'include/xpc'
    )
@@ -222,6 +225,7 @@ empty_depends = [ ]
 #                       'default_library'.  See project() above.
 #     shared_library:   Cannot see source files until stepped into.
 #     static_library:   Can see the source files when debugging.
+#     both_libraries:   Product both static and shared libraries.
 #
 # This one causes the linker to not see the library functions, wotta pain:
 #
