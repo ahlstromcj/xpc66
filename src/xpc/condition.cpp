@@ -41,10 +41,6 @@
 
 #include "xpc/condition.hpp"            /* xpc::condition & synchronizer    */
 
-/*
- *  Do not document a namespace; it breaks Doxygen.
- */
-
 namespace xpc
 {
 

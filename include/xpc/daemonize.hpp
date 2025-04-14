@@ -87,10 +87,6 @@ enum class daemonization
 const int c_daemonize_max_fd = 8192; /**< Max. file-descriptors to close.   */
 
 /*
- *  Do not document a namespace; it breaks Doxygen.
- */
-
-/*
  *  Free functions.
  *
  *    These functions do a lot of the work of dealing with UNIX daemons.

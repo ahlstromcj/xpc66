@@ -74,10 +74,6 @@
 #endif
 #endif
 
-/*
- *  Do not document a namespace; it breaks Doxygen.
- */
-
 namespace xpc
 {
 

@@ -40,10 +40,6 @@
 
 #include "cpp_types.hpp"                /* string, vector, msglevel         */
 
-/*
- *  Do not document a namespace; it breaks Doxygen.
- */
-
 namespace xpc
 {
 

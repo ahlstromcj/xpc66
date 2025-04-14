@@ -39,10 +39,6 @@
 
 #include "xpc/recmutex.hpp"             /* xpc::recmutex wrapper class      */
 
-/*
- *  Do not document a namespace; it breaks Doxygen.
- */
-
 namespace xpc
 {
 

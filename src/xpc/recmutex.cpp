@@ -92,10 +92,6 @@ typedef pthread_mutex_t StreamMutex;
 
 #endif      // FREEBSD
 
-/*
- *  Do not document a namespace; it breaks Doxygen.
- */
-
 namespace xpc
 {
 
