@@ -6,7 +6,7 @@
 #
 #   Lib66 wrapper for GitHub repository
 #
-#   When finished, replace 'wip' with 'head':
+#   If necessary (lib66 being updated), replace 'head' with 'wip'.
 #
 #----------------------------------------------------------------------------
 

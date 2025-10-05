@@ -6,7 +6,7 @@
 % \library     Documents
 % \author      Chris Ahlstrom
 % \date        2024-04-16
-% \update      2024-04-16
+% \update      2025-10-05
 % \version     $Revision$
 % \license     $XPC_GPL_LICENSE$
 %
@@ -27,6 +27,7 @@
       \item \texttt{automutex}
       \item \texttt{condition}
       \item \texttt{daemonize}
+      \item \texttt{errornumbers}
       \item \texttt{recmutex}
       \item \texttt{ring\_buffer}
       \item \texttt{shellexecute}
@@ -104,6 +105,23 @@
 
    Note that this is a \texttt{C++}-only module using
    \texttt{std::string} to pass and store information.
+
+\subsection{xpc::errornumbers}
+\label{subsec:xpc_namespace_errornumbers}
+
+   This module implements functions to map \texttt{errno} integers
+   to the macro names (e.g. \texttt{EAGAIN}).
+   This module can be useful to determine, visibly, the error code.
+   The \texttt{perror(3)} function shows a complete message, but
+   does not help in figuring out the error code.
+
+   The \texttt{errno\_name(errnum)} function returns a reference
+   to the simple string for the error number. For example,
+   \texttt{errno\_name(1)} function returns a reference "EPERM".
+
+   The \texttt{error\_number(errname)} does the reverse translation.
+
+   We should make a small program the does this!
 
 \subsection{xpc::recmutex}
 \label{subsec:xpc_namespace_recmutex}

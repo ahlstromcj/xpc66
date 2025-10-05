@@ -24,15 +24,16 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2025-10-02
- * \updates       2025-10-02
+ * \updates       2025-10-05
  * \license       GNU GPLv2 or above
  *
  *  Note that these strings are NOT the messages provided by perror().
  */
 
+#include <cstring>                      /* std::strerror(3); not <cstdio>   */
 #include <map>                          /* std::map()                       */
 
-#include "xpc/errornumbers.hpp"           /* xpc::errornumbers                  */
+#include "xpc/errornumbers.hpp"         /* xpc::errornumbers                */
 
 namespace xpc
 {
@@ -206,9 +207,9 @@ errno_name (int errnum)
  */
 
 int
-error_number (const std::string & errname)
+errno_number (const std::string & errname)
 {
-    int result = 0;
+    int result { 0 };
     for (const auto & n : s_error_numbers)
     {
         if (n.second == errname)
@@ -216,6 +217,57 @@ error_number (const std::string & errname)
             result = n.first;
             break;
         }
+    }
+    return result;
+}
+
+std::string
+errno_line (int e)
+{
+    std::string result { };
+    std::string digits { std::to_string(e) };
+    std::string spaces { };
+    if (digits.length() == 1)
+        spaces = "  ";
+    else if (digits.length() == 2)
+        spaces = " ";
+
+    result += spaces;                   /* yes, we know it's krufty */
+    result += digits;
+    result += ": ";
+    result += errno_name(e);
+    result += " (";
+    result += std::strerror(e);
+    result += ")";
+    return result;
+}
+
+/**
+ *  Creates a complete error chart as a string.
+ */
+
+std::string
+errno_chart ()
+{
+    std::string result { };
+    for (const auto & n : s_error_numbers)
+    {
+#if USE_THIS_CODE
+        std::string digits { std::to_string(n.first) };
+        std::string spaces { };
+        if (digits.length() == 1)
+            spaces = "  ";
+        else if (digits.length() == 2)
+            spaces = " ";
+
+        result += spaces;                   /* yes, we know it's krufty */
+        result += std::to_string(n.first);
+        result += ": ";
+        result += n.second;
+        result += "(";
+        result += std::strerror(n.first);
+#endif
+        result += errno_line(n.first);
     }
     return result;
 }

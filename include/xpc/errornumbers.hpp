@@ -28,7 +28,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom and other authors; see documentation
  * \date          2025-10-02
- * \updates       2025-10-02
+ * \updates       2025-10-05
  * \version       $Revision$
  * \license       GNU GPL v2 or above
  *
@@ -44,7 +44,9 @@ namespace xpc
  */
 
 extern const std::string & errno_name (int errnum);
-extern int error_number (const std::string & errname);
+extern int errno_number (const std::string & errname);
+extern std::string errno_chart ();
+extern std::string errno_line (int e);
 
 }               // namespace xpc
 
