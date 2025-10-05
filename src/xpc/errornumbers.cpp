@@ -268,6 +268,7 @@ errno_chart ()
         result += std::strerror(n.first);
 #endif
         result += errno_line(n.first);
+        result += "\n";
     }
     return result;
 }

@@ -69,20 +69,17 @@ main (int argc, char * argv [])
     int rcode { EXIT_FAILURE };
     if (argc > 1)
     {
-        std::cout << "Chart of Errno Numbers" << std::endl;
         std::string arg { argv[1] };
         int count { 0 };
         int digitcount { 0 };
         for (auto c : arg )
         {
             if (std::isdigit(c))
-            {
                 ++digitcount;
-            }
             else
-            {
                 arg[count] = std::toupper(arg[count]);
-            }
+
+            ++count;
         }
         if (digitcount > 0)
         {
@@ -94,7 +91,10 @@ main (int argc, char * argv [])
         else if (arg == "ALL")
         {
             std::string chart { xpc::errno_chart() };
-            std::cout << chart << std::endl;
+            std::cout
+                << "Chart of Errno Numbers" << std::endl
+                << chart << std::endl
+                ;
             rcode = EXIT_SUCCESS;
         }
         else if (arg[0] == 'E')
