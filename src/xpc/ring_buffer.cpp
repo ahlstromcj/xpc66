@@ -25,7 +25,7 @@
  * \library       xpc66 application
  * \author        Chris Ahlstrom
  * \date          2022-09-19
- * \updates       2024-04-24
+ * \updates       2025-10-27
  * \license       GNU GPLv2 or above
  *
  *  A lock-free ring buffer.
@@ -108,6 +108,7 @@
 
 #include <string>                       /* std::string                      */
 
+#include "cpp_types.hpp"                /* CSTR() inline functions          */
 #include "xpc/ring_buffer.hpp"          /* xpc::ringbuffer                  */
 
 #if defined PLATFORM_DEBUG
@@ -328,7 +329,7 @@ run_ring_test ()
             {
                 ring_test::cref item = rb.front();
                 std::string values = item.to_string();
-                printf("[%d] %s\n", i, values.c_str());
+                printf("[%d] %s\n", i, CSTR(values));
                 if (item.test_counter() != (i + 3))
                     result = false;
 

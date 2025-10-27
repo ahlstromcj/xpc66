@@ -25,7 +25,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2024-04-15
- * \updates       2024-04-17
+ * \updates       2024-10-27
  * \license       GNU GPLv2 or above
  *
  *  Near duplicates of a few functions from the cfg66 library, defined here
@@ -42,6 +42,7 @@
 #include <iostream>
 
 #include "c_macros.h"                   /* not_nullptr() macro              */
+#include "cpp_types.hpp"                /* CSTR() inline functions          */
 #include "platform_macros.h"            /* detects the build platform       */
 #include "xpc/utilfunctions.hpp"        /* basic message functions          */
 
@@ -302,12 +303,12 @@ get_full_path (const std::string & path)
 #if defined PLATFORM_WINDOWS              /* _MSVC not defined in Qt  */
         char * resolved_path = NULL;            /* what a relic!            */
         char temp[256];
-        resolved_path = _fullpath(temp, path.c_str(), 256);
+        resolved_path = _fullpath(temp, CSTR(path), 256);
         if (not_NULL(resolved_path))
             result = resolved_path;
 #else
         char * resolved_path = NULL;            /* what a relic!            */
-        resolved_path = realpath(path.c_str(), NULL);
+        resolved_path = realpath(CSTR(path), NULL);
         if (not_NULL(resolved_path))
         {
             result = resolved_path;
@@ -338,7 +339,7 @@ set_current_directory (const std::string & path)
     bool result = false;
     if (! path.empty())
     {
-        int rcode = S_CHDIR(path.c_str());
+        int rcode = S_CHDIR(CSTR(path));
         result = is_posix_success(rcode);
         if (! result)
             file_error("chdir() failed", path);
@@ -450,12 +451,13 @@ widen_string (const std::string & source)
 #if defined SEQ66_PLATFORM_WINDOWS
     size_t required_length = ::MultiByteToWideChar
     (
-        CP_UTF8, 0, source.c_str(), int(source.length()), 0, 0
+        CP_UTF8, 0, CSTR(source), int(source.length()), 0, 0
     );
     std::wstring result(required_length, L'\0');
     ::MultiByteToWideChar
     (
-        CP_UTF8, 0, source.c_str(), int(source.length()), &result[0], int(result.length())
+        CP_UTF8, 0, CSTR(source), int(source.length()),
+        &result[0], int(result.length())
     );
     return result;
 #else

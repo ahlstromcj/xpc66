@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2005-07-03 to 2007-08-21 (pre-Sequencer24/64)
- * \updates       2024-04-28
+ * \updates       2025-10-27
  * \license       GNU GPLv2 or above
  *
  *  Daemonization module of the POSIX C Wrapper (PSXC) library
@@ -84,6 +84,7 @@
 #include <cstring>                      /* std::strlen(), std::memset() ... */
 
 #include "c_macros.h"                   /* errprint()                       */
+#include "cpp_types.hpp"                /* CSTR() inline functions          */
 #include "platform_macros.h"            /* detects the build platform       */
 #include "xpc66-config.h"               /* the XPC66_HAVE macros            */
 #include "xpc/daemonize.hpp"            /* daemonization functions & macros */
@@ -340,7 +341,7 @@ daemonize
             s_app_name = "anonymous daemon";
 
         if ((flags & d_flag_no_syslog) == 0)    /* system log               */
-            openlog(s_app_name.c_str(), LOG_CONS|LOG_PID, LOG_USER);
+            openlog(CSTR(s_app_name), LOG_CONS|LOG_PID, LOG_USER);
 
         if ((flags & d_flag_no_set_currdir) == 0)
         {
@@ -478,7 +479,7 @@ reroute_stdio (const std::string & logfile)
         {
             int flags = O_WRONLY | O_CREAT | O_APPEND ;
             mode_t mode = S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP ;
-            int fd = open(logfile.c_str(), flags, mode);
+            int fd = open(CSTR(logfile), flags, mode);
             result = fd != (-1);
             if (result)
             {
@@ -495,9 +496,9 @@ reroute_stdio (const std::string & logfile)
                         printf
                         (
                             "\n'%s' \n'%s' \n'%s' \n",
-                            "app" /* seq_app_name().c_str()*/,
-                            normedpath.c_str(),
-                            current_date_time().c_str()
+                            "app" /* CSTR(seq_app_name())*/,
+                            CSTR(normedpath),
+                            CSTR(current_date_time())
                         );
                     }
                     else
@@ -673,7 +674,7 @@ get_pid_by_name (const std::string & exename)
     static const int s_pid_size = 200;      /* really only need about 10!   */
     pid_t result = 0;
     char cmd[s_pid_size + 1];
-    snprintf(cmd, s_pid_size, "pidof %s", exename.c_str());
+    snprintf(cmd, s_pid_size, "pidof %s", V(exename));
 
     FILE * fp = popen(cmd, "r");
     if (not_nullptr(fp))

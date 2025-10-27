@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-05-19
- * \updates       2025-02-01
+ * \updates       2025-10-27
  * \license       GNU GPLv2 or above
  *
  *  Provides support for cross-platform time-related functions.
@@ -29,6 +29,7 @@
 
 #include <cstdlib>                      /* int std::system(commandline)     */
 
+#include "cpp_types.hpp"                /* CSTR() inline functions          */
 #include "platform_macros.h"            /* detects the build platform       */
 #include "xpc/shellexecute.hpp"         /* xpc::open_document(), etc.       */
 #include "utilfunctions.hpp"            /* xpc::file_error() etc.           */
@@ -50,7 +51,7 @@ command_line (const std::string & cmdline)
     bool result = ! cmdline.empty();
     if (result)
     {
-        int rc = std::system(cmdline.c_str());
+        int rc = std::system(CSTR(cmdline));
         result = rc == 0;
         if (! result)
             (void) file_error("Command failed", cmdline);
@@ -198,7 +199,7 @@ open_document (const std::string & documentpath)
         std::string path = documentpath;
         HINSTANCE rc = ::ShellExecute
         (
-            NULL, op.c_str(), path.c_str(), NULL, NULL, SW_SHOW
+            NULL, CSTR(op), CSTR(path), NULL, NULL, SW_SHOW
         );
         result = uintptr_t(rc) > 32;
 #else
@@ -206,7 +207,7 @@ open_document (const std::string & documentpath)
         std::wstring path = widen_string(documentpath);
         HINSTANCE rc = ::ShellExecute
         (
-            NULL, op.c_str(), path.c_str(), NULL, NULL, SW_SHOW
+            NULL, CSTR(op), CSTR(path), NULL, NULL, SW_SHOW
         );
         result = uintptr_t(rc) > 32;
 #endif
