@@ -74,14 +74,16 @@ test_kbhit ()
 {
     /*
      * Hmmmm, only an Enter works. Why not other characters?
+     * Oh, we need to use the extended kbhit(), kbhit_ex() that
+     * temporarily puts the terminal in raw mode.
      */
 
-    printf("Waiting for an <Enter> keystroke...\n");
+    printf("Waiting for a keystroke...\n");
     for (;;)
     {
         printf(".");
         (void) ::fflush(stdout);
-        if (xpc::kbhit())
+        if (xpc::kbhit_ex())
         {
             printf("\n");
             break;

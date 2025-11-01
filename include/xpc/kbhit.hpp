@@ -36,11 +36,13 @@
 namespace xpc
 {
 
-extern bool kbhit ();
 extern int getch ();
+extern bool kbhit ();
 extern bool kbhit_ex ();
 extern void clear_kb ();
+extern void clear_kbex ();
 extern bool kbcheck ();
+extern bool kbcheckex ();
 
 }        // namespace xpc
 

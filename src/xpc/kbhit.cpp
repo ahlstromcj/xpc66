@@ -151,10 +151,27 @@ clear_kb ()
         (void) getch();
 }
 
+void
+clear_kb_ex ()
+{
+    while (kbhit_ex())
+        (void) getch();
+}
+
 bool
 kbcheck ()
 {
     bool result = kbhit();
+    if (result)
+        (void) getch();
+
+    return result;
+}
+
+bool
+kbcheck_ex ()
+{
+    bool result = kbhit_ex();
     if (result)
         (void) getch();
 
