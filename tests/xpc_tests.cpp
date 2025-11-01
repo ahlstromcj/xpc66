@@ -24,18 +24,23 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-07-03
- * \updates       2024-04-24
+ * \updates       2025-11-01
  * \license       See above.
  *
  *  To do: add a help-line for each option.
  */
 
-#include <cstdlib>                  /* EXIT_SUCCESS, EXIT_FAILURE       */
-#include <iostream>                 /* std::cout, std::cerr             */
-#include <string>                   /* std::string                      */
+#include <cstdlib>                      /* EXIT_SUCCESS, EXIT_FAILURE       */
+#include <iostream>                     /* std::cout, std::cerr             */
+#include <string>                       /* std::string                      */
 
-#include "xpc66.hpp"                /* xpc66_version() function         */
-#include "xpc/shellexecute.hpp"     /* xpc::open_pdf() for linkage test */
+#include "xpc66.hpp"                    /* xpc66_version() function         */
+#include "xpc/kbhit.hpp"                /* xpc::kbhit(), getch(), etc.      */
+#include "xpc/shellexecute.hpp"         /* xpc::open_pdf() for linkage test */
+#include "xpc/timing.hpp"               /* xpc66::microsleep(), etc.        */
+
+namespace   // anonymous
+{
 
 /*
  * Explanation text.
@@ -52,7 +57,7 @@ static const std::string help_intro
  * from the project top-level directory.
  */
 
-static bool
+bool
 test_shell_execution ()
 {
     static std::string s_doc = "./doc/xpc66-library-guide.pdf";
@@ -64,6 +69,31 @@ test_shell_execution ()
     return result;
 }
 
+bool
+test_kbhit ()
+{
+    /*
+     * Hmmmm, only an Enter works. Why not other characters?
+     */
+
+    printf("Waiting for an <Enter> keystroke...\n");
+    for (;;)
+    {
+        printf(".");
+        (void) ::fflush(stdout);
+        if (xpc::kbhit())
+        {
+            printf("\n");
+            break;
+        }
+        xpc::millisleep(500);
+    }
+    printf("Thank you!\n");
+    return true;
+}
+
+}   // namespace anonymous
+
 /*
  * main() routine
  */
@@ -71,44 +101,17 @@ test_shell_execution ()
 int
 main (int /*argc*/, char * /*argv*/ [])
 {
-    int rcode = EXIT_FAILURE;
     std::cout << "Test of " << xpc66_version() << ":" << std::endl;
-    if (test_shell_execution())
-    {
-        rcode = EXIT_SUCCESS;
 
-        // do more tests....
-    }
-#if 0
-    xpc::cliparser clip(test_options);
-    bool success = clip.parse(argc, argv);
+    bool success { test_kbhit() };
     if (success)
-    {
-        rcode = EXIT_SUCCESS;
-        if (clip.help_request())
-        {
-            std::cout
-                << help_intro
-                << clip.help_text()
-                ;
-        }
-        else if (clip.version_request())
-        {
-            printf("Version 0.0.0\n");  /* TODO! */
-        }
-    }
-    if (success)
-        std::cout << "cliparser C++ test succeeded" << std::endl;
-    else
-        std::cout << "cliparser C++ test failed" << std::endl;
+        success = test_shell_execution();   /* this test should come last   */
 
-#endif
-    return rcode;
+    return success ? EXIT_SUCCESS : EXIT_FAILURE ;
 }
 
 /*
  * xpc_tests.cpp
  *
- * vim: sw=4 ts=4 wm=4 et ft=c
+ * vim: sw=4 ts=4 wm=4 et ft=cpp
  */
-

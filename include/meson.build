@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2025-10-02
+# \updates     2025-11-01
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. See the top-level meson.build
@@ -25,6 +25,7 @@ libxpc66_headers += files(
    'xpc/condition.hpp',
    'xpc/daemonize.hpp',
    'xpc/errornumbers.hpp',
+   'xpc/kbhit.hpp',
    'xpc/recmutex.hpp',
    'xpc/ring_buffer.hpp',
    'xpc/shellexecute.hpp',

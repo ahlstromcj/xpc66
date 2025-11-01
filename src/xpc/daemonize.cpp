@@ -822,6 +822,8 @@ get_parent_process_name ()
 }           // namespace xpc
 
 /*
+ * daemonize.cpp
+ *
  * vim: ts=4 sw=4 et ft=cpp
  */
 
