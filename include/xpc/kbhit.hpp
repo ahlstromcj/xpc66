@@ -42,7 +42,7 @@ extern bool kbhit_ex ();
 extern void clear_kb ();
 extern void clear_kb_ex ();
 extern bool kbcheck ();
-extern bool kbcheckex ();
+extern bool kbcheck_ex ();
 
 }        // namespace xpc
 
