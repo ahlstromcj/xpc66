@@ -40,7 +40,7 @@ extern int getch ();
 extern bool kbhit ();
 extern bool kbhit_ex ();
 extern void clear_kb ();
-extern void clear_kbex ();
+extern void clear_kb_ex ();
 extern bool kbcheck ();
 extern bool kbcheckex ();
 
