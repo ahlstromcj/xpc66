@@ -8,7 +8,7 @@
 # \library        xpc66
 # \author         Chris Ahlstrom
 # \date           2024-02-06
-# \update         2025-01-31
+# \update         2025-11-01
 # \version        $Revision$
 # \license        $XPC_SUITE_GPL_LICENSE$
 #
@@ -30,7 +30,7 @@ LANG=C
 export LANG
 CYGWIN=binmode
 export CYGWIN
-export XPC66_SCRIPT_EDIT_DATE="2025-01-31"
+export XPC66_SCRIPT_EDIT_DATE="2025-11-01"
 export XPC66_LIBRARY_API_VERSION="0.2"
 export XPC66_LIBRARY_VERSION="$XPC66_LIBRARY_API_VERSION.0"
 export XPC66="xpc66"
@@ -256,6 +256,7 @@ if test $DOCLEAN = "yes" ; then
    rm -rf wipe/
    rm -rf subprojects/liblib66/
    rm -rf subprojects/potext
+   rm -f subprojects/.wraplock
    rm -f doc/dox/*.log
    rm -f doc/latex/*.log
    echo "Build products removed from the xpc66/build directory."
