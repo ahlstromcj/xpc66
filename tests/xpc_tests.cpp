@@ -24,7 +24,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-07-03
- * \updates       2025-11-01
+ * \updates       2025-11-04
  * \license       See above.
  *
  *  To do: add a help-line for each option.
@@ -52,23 +52,6 @@ static const std::string help_intro
     "independence of the xpc66 library.  Options are as follows:\n\n"
 };
 
-/*
- * Test of shellexecute functions. It assumes the test is being run
- * from the project top-level directory.
- */
-
-bool
-test_shell_execution ()
-{
-    static std::string s_doc = "./doc/xpc66-library-guide.pdf";
-    bool result = xpc::open_pdf(s_doc);
-    if (! result)
-    {
-        std::cerr << "Failed to open '" << s_doc << "'" << std::endl;
-    }
-    return result;
-}
-
 bool
 test_kbhit ()
 {
@@ -94,6 +77,58 @@ test_kbhit ()
     return true;
 }
 
+bool
+test_getch ()
+{
+    std::cout << "Press any key again..." << std::endl;
+    xpc::clear_kb_ex();
+
+    int c { xpc::getch() };
+    char character { char(c) };
+    std::cout << "'" << character << "' pressed" << std::endl;
+    return true;
+}
+
+bool
+test_kbget ()
+{
+    std::cout << "Press any key yet again, then <Enter>..." << std::endl;
+    xpc::clear_kb_ex();
+
+    char c { xpc::kbget() };
+    std::cout << "'" << c << "' entered" << std::endl;
+    return true;
+}
+
+/*
+ * Test of shellexecute functions. It assumes the test is being run
+ * from the project top-level directory.
+ *
+ * Note: On one laptop, this appears:
+ *
+ *  [25687:25706:1104/072528.126313:
+ *      ERROR:google_apis/gcm/engine/registration_request.cc:291]
+ *  Registration response error message: DEPRECATED_ENDPOINT
+ *
+ * One workaround is to suppress this error (and others) by tweaking
+ * the chrome options tag like this.
+ *
+ *      chrome_options = Options()
+ *      chrome_options.add_argument("--log-level=3")
+ */
+
+bool
+test_shell_execution ()
+{
+    static std::string s_doc = "./doc/xpc66-library-guide.pdf";
+    bool result = xpc::open_pdf(s_doc);
+    if (! result)
+    {
+        std::cerr << "Failed to open '" << s_doc << "'" << std::endl;
+    }
+    return result;
+}
+
 }   // namespace anonymous
 
 /*
@@ -106,6 +141,12 @@ main (int /*argc*/, char * /*argv*/ [])
     std::cout << "Test of " << xpc66_version() << ":" << std::endl;
 
     bool success { test_kbhit() };
+    if (success)
+        success = test_getch();
+
+    if (success)
+        success = test_kbget();
+
     if (success)
         success = test_shell_execution();   /* this test should come last   */
 

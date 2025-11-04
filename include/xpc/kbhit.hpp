@@ -23,7 +23,7 @@
  * \file          kbhit.hpp
  * \author        Chris Ahlstrom
  * \date          2025-11-01
- * \updates       2025-11-01
+ * \updates       2025-11-04
  * \license       GNU GPLv2 or above
  *
  *    Kbhit of POSIX C Wrapper (PSXC) library
@@ -43,6 +43,7 @@ extern void clear_kb ();
 extern void clear_kb_ex ();
 extern bool kbcheck ();
 extern bool kbcheck_ex ();
+extern char kbget ();
 
 }        // namespace xpc
 
