@@ -25,7 +25,7 @@
  * \library       xpc66 application
  * \author        Chris Ahlstrom
  * \date          2022-09-19
- * \updates       2025-10-27
+ * \updates       2025-11-25
  * \license       GNU GPLv2 or above
  *
  *  A lock-free ring buffer.
@@ -217,6 +217,39 @@ run_ring_test ()
     ring_test rt_h(8, "rt_h");
     ring_test rt_i(9, "rt_i");
     ring_test rt_j(10, "rt_j");
+
+    /*
+     * Uninitialized test
+     */
+
+    ring_buffer<ring_test> rb0;
+    if (rb0.is_initialized())
+    {
+        show_error("ring_buffer uninitialized failed");
+        result = false;
+    }
+    if (rb0.push_back(rt_a))
+    {
+        show_error("ring_buffer uninitialized 2 failed");
+        result = false;
+    }
+
+    rb0.initialize(34);
+    if (rb0.is_initialized())
+    {
+        if (rb0.buffer_size() != 64)
+        {
+            show_error("ring_buffer initialized size error");
+            result = false;
+        }
+    }
+    else
+    {
+        show_error("ring_buffer::initialized failed");
+        result = false;
+    }
+    if (! result)
+        return false;
 
     /*
      * Smoke test

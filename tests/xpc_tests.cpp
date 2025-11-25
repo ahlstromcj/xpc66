@@ -24,7 +24,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-07-03
- * \updates       2025-11-01
+ * \updates       2025-11-25
  * \license       See above.
  *
  *  To do: add a help-line for each option.
@@ -36,6 +36,7 @@
 
 #include "xpc66.hpp"                    /* xpc66_version() function         */
 #include "xpc/kbhit.hpp"                /* xpc::kbhit(), getch(), etc.      */
+#include "xpc/ring_buffer.hpp"          /* xpc::run_ring_test()             */
 #include "xpc/shellexecute.hpp"         /* xpc::open_pdf() for linkage test */
 #include "xpc/timing.hpp"               /* xpc66::microsleep(), etc.        */
 
@@ -106,6 +107,9 @@ main (int /*argc*/, char * /*argv*/ [])
     std::cout << "Test of " << xpc66_version() << ":" << std::endl;
 
     bool success { test_kbhit() };
+    if (success)
+        success = xpc::run_ring_test();
+
     if (success)
         success = test_shell_execution();   /* this test should come last   */
 
