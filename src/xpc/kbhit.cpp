@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2025-11-01
- * \updates       2025-11-01
+ * \updates       2025-11-04
  * \license       GNU GPLv2 or above
  *
  *  Kbhit/getch module of the POSIX C Wrapper (PSXC) library
@@ -35,7 +35,7 @@
  *      https://github.com/thradams/conio
  */
 
-#include <stdio.h>                      /* getchar() and EOF                */
+#include <iostream>                     /* std::cout, std::cin, getchar/EOF */
 
 #include "platform_macros.h"            /* detects the build platform       */
 #include "kbhit.hpp"                    /* xpc::kbhit(), getch(), etc.      */
@@ -176,6 +176,17 @@ kbcheck_ex ()
         (void) getch();
 
     return result;
+}
+
+/**
+ *  This function waits for input of <Enter> or <Ctrl-D>. That is all.
+ *  The character is returned.
+ */
+
+char
+kbget ()
+{
+    return std::cin.get();
 }
 
 }           // namespace xpc
