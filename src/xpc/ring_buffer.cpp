@@ -219,6 +219,39 @@ run_ring_test ()
     ring_test rt_j(10, "rt_j");
 
     /*
+     * Uninitialized test
+     */
+
+    ring_buffer<ring_test> rb0;
+    if (rb0.is_initialized())
+    {
+        show_error("ring_buffer uninitialized failed");
+        result = false;
+    }
+    if (rb0.push_back(rt_a))
+    {
+        show_error("ring_buffer uninitialized 2 failed");
+        result = false;
+    }
+
+    rb0.initialize(34);
+    if (rb0.is_initialized())
+    {
+        if (rb0.buffer_size() != 64)
+        {
+            show_error("ring_buffer initialized size error");
+            result = false;
+        }
+    }
+    else
+    {
+        show_error("ring_buffer::initialized failed");
+        result = false;
+    }
+    if (! result)
+        return false;
+
+    /*
      * Smoke test
      */
 

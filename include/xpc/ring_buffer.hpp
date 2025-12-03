@@ -62,6 +62,12 @@ public:
 private:
 
     /**
+     *  Indicates if initialize() has been called.
+     */
+
+    bool m_is_initialized { false };
+
+    /**
      *  Container for all push/popped items.
      */
 
@@ -117,10 +123,32 @@ private:
 
 public:
 
+    /**
+     *  If the default constructor is used, the caller must call
+     *  ring_buffer::initialze() before using it. But see the
+     *  is_initialized() function below.
+     */
+
+    ring_buffer () = default;
     explicit ring_buffer (size_type sz);
     ~ring_buffer ();
 
+    void initialize (size_type sz = 0);
     bool mlock ();
+
+    bool is_initialized () const
+    {
+        /*
+         * Do we want to use lazy initialization, or rely on the caller
+         * calling the correct constructor, or calling initialize()
+         * after construction?
+         *
+         *  if (! m_is_initialized)
+         *      initialize();
+         */
+
+        return m_is_initialized;
+    }
 
     /**
      *  Reset the read and write pointers to zero. This is not thread safe.
@@ -213,7 +241,6 @@ public:
 
 private:    // helper functions
 
-    void initialize ();
     void increment_head ();
     void increment_tail ();
 
@@ -228,12 +255,18 @@ private:    // helper functions
  *  Create a new ringbuffer to hold at least `sz' elements (TYPE) of data.
  *  The actual buffer size is rounded up to the next power of two.
  *
- *  Members are initialized "in-class".
+ *  Most member are initialized "in-class".
  */
 
 template<typename TYPE>
 ring_buffer<TYPE>::ring_buffer (size_type sz)
 {
+#if defined USE_THIS_CODE
+
+    /*
+     * Code moved to initialize()
+     */
+
     int power_of_two;
     for (power_of_two = 1; 1 << power_of_two < int(sz); ++power_of_two)
         ;
@@ -241,7 +274,9 @@ ring_buffer<TYPE>::ring_buffer (size_type sz)
     size_type psize { size_t(1 << power_of_two) };
     m_buffer_size = psize;
     m_size_mask = psize - 1;                /* 0xFF... for index safety     */
-    initialize();
+#endif
+
+    initialize(sz);
 }
 
 /**
@@ -263,25 +298,50 @@ ring_buffer<TYPE>::~ring_buffer ()
 
 template<typename TYPE>
 void
-ring_buffer<TYPE>::initialize ()
+ring_buffer<TYPE>::initialize (size_type sz)
 {
     TYPE empty_value;
+    if (sz == 0)
+    {
+        sz = m_buffer_size;
+    }
+    else
+    {
+        int power_of_two;
+        for (power_of_two = 1; 1 << power_of_two < int(sz); ++power_of_two)
+            ;
+
+        sz = size_t(1 << power_of_two);
+        m_buffer_size = sz;
+        m_size_mask = sz - 1;               /* 0xFF... for index safety     */
+    }
     m_buffer.clear();
-    m_buffer.reserve(m_buffer_size);
-    for (size_t i = 0; i < m_buffer_size; ++i)
-        (void) m_buffer.push_back(empty_value);
+    m_is_initialized = false;
+    if (sz > 0)
+    {
+        m_buffer.reserve(m_buffer_size);
+        for (size_t i = 0; i < m_buffer_size; ++i)
+            (void) m_buffer.push_back(empty_value);
+
+        m_is_initialized = true;
+    }
+    else
+        m_is_initialized = false;
 }
 
 template<typename TYPE>
 void
 ring_buffer<TYPE>::increment_head ()
 {
-    if (m_contents_size > 0)
+    if (is_initialized())
     {
-        ++m_head;
-        --m_contents_size;
-        if (m_head == m_buffer_size)
-            m_head = 0;                                 /* wrap around  */
+        if (m_contents_size > 0)
+        {
+            ++m_head;
+            --m_contents_size;
+            if (m_head == m_buffer_size)
+                m_head = 0;                                 /* wrap around  */
+        }
     }
 }
 
@@ -289,13 +349,16 @@ template<typename TYPE>
 void
 ring_buffer<TYPE>::increment_tail ()
 {
-    ++m_tail;
-    ++m_contents_size;
-    if (m_contents_size > m_contents_max)               /* for checking */
-        m_contents_max = m_contents_size;
+    if (is_initialized())
+    {
+        ++m_tail;
+        ++m_contents_size;
+        if (m_contents_size > m_contents_max)               /* for checking */
+            m_contents_max = m_contents_size;
 
-    if (m_tail == m_buffer_size)
-        m_tail = 0;                                     /* wrap around  */
+        if (m_tail == m_buffer_size)
+            m_tail = 0;                                     /* wrap around  */
+    }
 }
 
 /**
@@ -321,7 +384,7 @@ ring_buffer<TYPE>::mlock ()
 /**
  *  Return the number of elements available for writing.  This is the number
  *  of elements in front of the write/tail pointer and behind the read/head
- *  pointer.
+ *  pointer. If not initialized, 0 will be returned.
  */
 
 template<typename TYPE>
@@ -346,9 +409,9 @@ ring_buffer<TYPE>::write_advance ()
 }
 
 /**
- *  Since we only push one element at a time, the return code is used to determine
- *  the number of elements currently active in the ring_buffer, unless 0 is
- *  returned, which indicates an error (no space left).
+ *  Since we only push one element at a time, the return code is used to
+ *  determine the number of elements currently active in the ring_buffer,
+ *  unless 0 is returned, which indicates an error (no space left).
  */
 
 template<typename TYPE>
@@ -368,7 +431,7 @@ ring_buffer<TYPE>::write (const_reference src)
 /**
  *  Return the number of elements (TYPE) available for reading.  This is the
  *  number of elements in front of the read pointer and behind the write
- *  pointer.
+ *  pointer. Again, this function should return 0 if not initialized.
  */
 
 template<typename TYPE>
@@ -394,8 +457,11 @@ template<typename TYPE>
 void
 ring_buffer<TYPE>::read_advance ()
 {
-    ++m_head;
-    m_head &= m_size_mask;
+    if (is_initialized())
+    {
+        ++m_head;
+        m_head &= m_size_mask;
+    }
 }
 
 /**
@@ -405,6 +471,7 @@ ring_buffer<TYPE>::read_advance ()
  *
  *  Unlike front(), this function and pop_front() "remove" the element.
  *  The result return is the number of elements still stored.
+ *  Again, this function should return 0 if not initialized.
  */
 
 template<typename TYPE>
@@ -431,25 +498,29 @@ template<typename TYPE>
 bool
 ring_buffer<TYPE>::push_back (const value_type & item)
 {
-    if (m_contents_size == 0)
+    bool result { is_initialized() };
+    if (result)
     {
-        m_tail = m_head;
-        m_buffer[m_tail] = item;
-        increment_tail();
+        if (m_contents_size == 0)
+        {
+            m_tail = m_head;
+            m_buffer[m_tail] = item;
+            increment_tail();
+        }
+        else if (m_contents_size < m_buffer_size)
+        {
+            m_buffer[m_tail] = item;
+            increment_tail();
+        }
+        else                                /* accept item and drop front() */
+        {
+            increment_head();
+            m_buffer[m_tail] = item;
+            increment_tail();
+            ++m_dropped;                    /* for future use in expansion  */
+        }
     }
-    else if (m_contents_size < m_buffer_size)
-    {
-        m_buffer[m_tail] = item;
-        increment_tail();
-    }
-    else                                    /* accept item and drop front() */
-    {
-        increment_head();
-        m_buffer[m_tail] = item;
-        increment_tail();
-        ++m_dropped;                        /* for future use in expansion  */
-    }
-    return true;
+    return result;
 }
 
 /*
