@@ -46,9 +46,15 @@
 #include "lib_build_macros.h"           /* PLATFORM_DEBUG macro, etc.       */
 
 #undef  XPC66_USE_MEMORY_LOCK           /* TODO: needs a lot of work !      */
+#undef  XPC66_USE_AUTOMUTEX             /* TODO                             */
 
 #if defined XPC66_USE_MEMORY_LOCK
 #include <sys/mman.h>
+#endif
+
+#if defined XPC66_USE_AUTOMUTEX
+#include "xpc/automutex.hpp"            /* xpc::automutex                   */
+#include "xpc/recmutex.hpp"             /* xpc::recmutex                    */
 #endif
 
 namespace xpc
@@ -77,13 +83,24 @@ private:
      *  The container for all push/popped items in the queue.
      */
 
-    container m_buffer { };
+    container m_queue { };
 
     /**
      *  Constant container size.
      */
 
-    size_type m_buffer_size { 32 };
+    size_type m_queue_size { 32 };
+
+#if defined XPC66_USE_AUTOMUTEX
+
+    /**
+     *  The locking mutex.  This object is passed to an automutex object that
+     *  lends exception-safety to the mutex locking.
+     */
+
+    mutable xpc::recmutex m_mutex { };
+
+#endif
 
     /**
      *  Indicates whether the size of the queue is limited or not,
@@ -125,7 +142,7 @@ public:
 
     int buffer_size () const
     {
-        return int(m_buffer_size);
+        return int(m_queue_size);
     }
 
     /**
@@ -134,7 +151,7 @@ public:
 
     int count () const
     {
-        return int(m_buffer.size());
+        return int(m_queue.size());
     }
 
     bool empty () const
@@ -160,12 +177,14 @@ public:
 
     reference front ()
     {
-        return m_buffer.front();
+        static value_type s_dummy;
+        return count() > 0 ? m_queue.front() : s_dummy ;
     }
 
     const_reference front () const
     {
-        return m_buffer.front();
+        static value_type s_dummy;
+        return count() > 0 ? m_queue.front() : s_dummy ;
     }
 
     /**
@@ -175,12 +194,14 @@ public:
 
     reference back ()
     {
-        return m_buffer.back();
+        static value_type s_dummy;
+        return count() > 0 ? m_queue.back() : s_dummy ;
     }
 
     const_reference back () const
     {
-        return m_buffer.back();
+        static value_type s_dummy;
+        return count() > 0 ? m_queue.back() : s_dummy ;
     }
 
 private:    // helper functions
@@ -205,7 +226,7 @@ fifo<TYPE>::fifo (size_type sz)
 {
     if (sz > 0)
     {
-        m_buffer_size = sz;             /* otherwise the queue size is 32   */
+        m_queue_size = sz;             /* otherwise the queue size is 32   */
         m_infinite = false;             /* otherwise the growth is endless  */
     }
     initialize();
@@ -220,17 +241,32 @@ fifo<TYPE>::~fifo ()
 {
 #if defined XPC66_USE_MEMORY_LOCK
     if (m_locked)
-        ::munlock(m_buffer, m_buffer_size);
+        ::munlock(m_queue, m_queue_size);
 #endif
 }
+
+/**
+ *  The std::queue container does not have a clear() function.
+ *  There are three ways to empty it:
+ *
+ *      -   While the queue is not empty, pop() in a loop.
+ *      -   Swap it with an empty queue.
+ *      -   Assign an empty queue to it.
+ *
+ *  The first option is slow, but straightforward.
+ *
+ *  The std::queue container does not have a reserve() function.
+ *
+ *      m_queue.reserve(m_queue_size);
+ */
 
 template<typename TYPE>
 void
 fifo<TYPE>::initialize ()
 {
-    TYPE empty_value;
-    m_buffer.clear();
-    m_buffer.reserve(m_buffer_size);
+    while (! m_queue.empty())
+        m_queue.pop();
+
     m_dropped = 0;
 }
 
@@ -244,7 +280,7 @@ bool
 fifo<TYPE>::mlock ()
 {
 #if defined XPC66_USE_MEMORY_LOCK
-    if (::mlock(m_buffer, m_buffer_size) != 0)
+    if (::mlock(m_queue, m_queue_size) != 0)
         return false;
 
     m_locked = true;
@@ -262,9 +298,12 @@ template<typename TYPE>
 bool
 fifo<TYPE>::push (const value_type & item)
 {
-    if (m_infinite || m_buffer.size() < m_buffer_size)
+#if defined XPC66_USE_AUTOMUTEX
+    xpc::automutex locker(m_mutex);
+#endif
+    if (m_infinite || m_queue.size() < m_queue_size)
     {
-        m_buffer.push_back(item);
+        m_queue.push(item);
         return true;
     }
     else                                    /* accept item and drop front() */
@@ -284,11 +323,14 @@ template<typename TYPE>
 typename fifo<TYPE>::value_type
 fifo<TYPE>::pop ()
 {
+#if defined XPC66_USE_AUTOMUTEX
+    xpc::automutex locker(m_mutex);
+#endif
     static value_type s_dummy;
-    if (m_buffer.size() > 0)
+    if (m_queue.size() > 0)
     {
         value_type result { front() };
-        m_buffer.pop_front();
+        m_queue.pop();
         return result;
     }
     else

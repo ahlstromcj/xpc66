@@ -24,7 +24,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-07-03
- * \updates       2025-11-25
+ * \updates       2025-12-03
  * \license       See above.
  *
  *  To do: add a help-line for each option.
@@ -35,6 +35,7 @@
 #include <string>                       /* std::string                      */
 
 #include "xpc66.hpp"                    /* xpc66_version() function         */
+#include "xpc/fifo.hpp"                 /* xpc::run_fifo_test()             */
 #include "xpc/kbhit.hpp"                /* xpc::kbhit(), getch(), etc.      */
 #include "xpc/ring_buffer.hpp"          /* xpc::run_ring_test()             */
 #include "xpc/shellexecute.hpp"         /* xpc::open_pdf() for linkage test */
@@ -152,7 +153,23 @@ main (int /*argc*/, char * /*argv*/ [])
         success = xpc::run_ring_test();
 
     if (success)
+        success = xpc::run_fifo_test();
+
+#if defined TEST_SHELL_EXECUTION
+
+    /*
+     * This test is annoying, so enable this test only if a change has
+     * been make to the open_pdf() function in the shellexecute module.
+     */
+
+    if (success)
         success = test_shell_execution();   /* this test should come last   */
+#endif
+
+    if (success)
+        std::cout << "xpc_tests has succeeded." << std::endl;
+    else
+        std::cerr << "xpc_tests has failed." << std::endl;
 
     return success ? EXIT_SUCCESS : EXIT_FAILURE ;
 }

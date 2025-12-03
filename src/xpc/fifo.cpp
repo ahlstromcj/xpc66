@@ -70,7 +70,7 @@
 namespace xpc
 {
 
-#if defined PLATFORM_DEBUG_TMI          // TO DO
+#if defined PLATFORM_DEBUG
 
 class fifo_test
 {
@@ -124,7 +124,7 @@ show_message (const std::string & msg)
 static void
 show_error (const std::string & msg)
 {
-    std::cerr << msg << std::endl;
+    std::cerr << "? " << msg << std::endl;
 }
 
 static bool
@@ -174,31 +174,28 @@ run_fifo_test ()
      * Smoke test
      */
 
-    fifo<fifo_test> rb(7);           /* should become 8 (power of 2) */
-    std::size_t sz { fife.write(rt_a) };
-    if (sz != 1)
+    fifo<fifo_test> fife(8);
+    result = fife.push(rt_a);
+
+    std::size_t sz { std::size_t(fife.count()) };
+    if (! result || sz != 1)
     {
-        show_error("fifo::write() failed");
+        show_error("fifo::push() failed");
         result = false;
     }
     else
     {
-        fifo_test rt;
-        sz = fife.read(rt);
+        fifo_test rt { fife.pop() };
+        sz = std::size_t(fife.count());
         if (sz > 0)
         {
-            show_error("fifo::read() failed");
+            show_error("fifo::pop() failed");
             result = false;
         }
         else
         {
             std::string ss { rt.to_string() };
-            std::cout << "Read test object '" << ss << "'" << std::endl;
-            if (fife.count() > 0)
-            {
-                show_error("read() failed to pop the object");
-                result = false;
-            }
+            std::cout << "Pop test object '" << ss << "'" << std::endl;
         }
     }
 
@@ -210,6 +207,7 @@ run_fifo_test ()
 
     if (result)
     {
+        (void) fife.push(rt_a);
         fife.clear();
         if (! fife.empty())
         {
@@ -217,10 +215,9 @@ run_fifo_test ()
             result = false;
         }
     }
-
     if (result)
     {
-        std::size_t space { fife.read_space() };
+        std::size_t space { std::size_t(fife.count()) };
         if (space == 0)
         {
             fife.push(rt_a);
@@ -231,20 +228,17 @@ run_fifo_test ()
             fife.push(rt_f);
             fife.push(rt_g);
             fife.push(rt_h);
-            space = fife.read_space();
-            if (fife.count() != 8 || space != 8)
+            sz = fife.count();
+            if (fife.count() != 8)
             {
                 show_error("fifo count mismatch");
                 result = false;
             }
             if (result)
             {
-                space = fife.write_space();
-                if (space > 0)
-                {
-                    show_error("write space > 0");
-                    result = false;
-                }
+                result = ! fife.push(rt_i);
+                if (! result)
+                    show_error("push() did not fail as expected");
             }
         }
         else
@@ -259,17 +253,9 @@ run_fifo_test ()
          * Here, rt_a and rt_b should be dropped.
          */
 
-        fife.push(rt_i);
-        fife.push(rt_j);
-
-        std::size_t rspace { fife.read_space() };
-        std::size_t wspace { fife.write_space() };
-        if (fife.count() != 8 || rspace != 8 || wspace != 0)
-        {
-            show_error("objects not overwritten");
-            result = false;
-        }
-        if (fife.dropped() != 2)
+        (void) fife.push(rt_i);
+        (void) fife.push(rt_j);
+        if (fife.dropped() != 3)
         {
             show_error("unexpected number of dropped items");
             result = false;
@@ -281,22 +267,27 @@ run_fifo_test ()
             {
                 fifo_test::cref item { fife.front() };
                 std::string values { item.to_string() };
-                printf("[%d] %s\n", i, CSTR(values));
-                if (item.test_counter() != (i + 3))
+                int counter { item.test_counter() };
+                printf("[%d] %d --> \"%s\"", i, counter, CSTR(values));
+                if (counter != (i + 1))
+                {
+                    printf("\n");
                     result = false;
-
-                fife.pop();
+                }
+                (void) fife.pop();
+                printf(" popped\n");
             }
             if (! result)
-                show_message("Item-counter mismatch detected");
+                show_message("Item/counter mismatch detected");
 
             if (fife.empty())
             {
-                show_message("Should see rt_c through rt_j values");
+                show_message("Should see rt_a through rt_h values");
             }
             else
             {
-                show_error("ringbuffer still has items!");
+                show_error("fifo still has items!");
+                printf("  %d items left\n", fife.count());
                 result = false;
             }
         }
@@ -311,12 +302,17 @@ run_fifo_test ()
     if (result)
     {
         fife.clear();
+        std::cout
+            << "Fifo is cleared, but we try to access the front " << std::endl
+            << "  & back items anyway, and get the default values." << std::endl
+            ;
 
         fifo_test::cref fitem { fife.front() };
         fifo_test::cref bitem { fife.back() };
         result = item_test(fitem, "front", (-1));   /* usability test   */
         result = item_test(bitem, "back", (-1));    /* usability test   */
 
+        std::cout << "Now we push 4 good items into the fifo." << std::endl;
         fife.push(rt_a);                            /* front (1)        */
         fife.push(rt_b);
         fife.push(rt_c);
@@ -325,6 +321,7 @@ run_fifo_test ()
         if (result)
         {
             fifo_test::cref frontitem { fife.front() };
+            std::cout << "Show the front & back items." << std::endl;
             result = item_test(frontitem, "[front]", 1);
             if (result)
             {
@@ -333,7 +330,11 @@ run_fifo_test ()
             }
             if (result)
             {
-                fife.pop();
+                fifo_test ft { fife.pop() };
+                std::cout << "Show the front (popped) item." << std::endl;
+                std::string values { ft.to_string() };
+                int counter { ft.test_counter() };
+                printf("Popped %d --> '%s'\n", counter, CSTR(values));
             }
             else
                 show_error("First front call failed");

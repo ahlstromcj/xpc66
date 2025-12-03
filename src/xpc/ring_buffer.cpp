@@ -377,7 +377,7 @@ run_ring_test ()
             }
             else
             {
-                show_error("ringbuffer still has items!");
+                show_error("ring_buffer still has items!");
                 result = false;
             }
         }
