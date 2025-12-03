@@ -1,4 +1,4 @@
-# README for Library Xpc66 0.2.0 2025-01310
+# README for Library Xpc66 0.2.0 2025-12-03
 
 __Xpc66__ is a cross-platform utilities library based on the "util" and "os"
 directories of the __Seq66__ project, but that is useful in other applications.

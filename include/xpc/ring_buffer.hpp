@@ -28,7 +28,7 @@
  * \library       xpc66 application
  * \author        Chris Ahlstrom
  * \date          2022-09-19
- * \updates       2025-01-31
+ * \updates       2025-12-03
  * \license       GNU GPLv2 or above
  */
 
@@ -61,15 +61,59 @@ public:
 
 private:
 
-    container m_buffer;         /**< Container for all push/popped items.   */
-    size_type m_buffer_size;    /**< Constant power-of-two container size.  */
-    size_type m_contents_size;  /**< Number of active entries in container. */
-    volatile size_type m_tail;  /**< Index where next item is written.      */
-    volatile size_type m_head;  /**< Index where next item is read.         */
-    size_type m_size_mask;      /**< Restricts index to < buffer size.      */
-    bool m_locked;              /**< Is memory locked? NOT YET SUPPORTED.   */
-    size_type m_contents_max;   /**< Useful in trouble-shooting.            */
-    int m_dropped;              /**< Number of items overwritten in run.    */
+    /**
+     *  Container for all push/popped items.
+     */
+
+    container m_buffer { };
+
+    /**
+     *  Constant power-of-two container size.
+     */
+
+    size_type m_buffer_size { 0 };
+
+    /**
+     *  Number of active entries in container.
+     */
+
+    size_type m_contents_size { 0 };
+
+    /**
+     *  Index where next item is written.
+     */
+
+    volatile size_type m_tail { 0 };
+
+    /**
+     *  Index where next item is read.
+     */
+
+    volatile size_type m_head { 0 };
+
+    /**
+     *  Restricts index to < buffer size.
+     */
+
+    size_type m_size_mask { 0 };
+
+    /**
+     *  Is memory locked? NOT YET SUPPORTED.
+     */
+
+    bool m_locked { false };
+
+    /**
+     *  Useful in trouble-shooting.
+     */
+
+    size_type m_contents_max { 0 };
+
+    /**
+     *  Number of items overwritten in run.
+     */
+
+    int m_dropped { 0 };
 
 public:
 
@@ -183,25 +227,18 @@ private:    // helper functions
 /**
  *  Create a new ringbuffer to hold at least `sz' elements (TYPE) of data.
  *  The actual buffer size is rounded up to the next power of two.
+ *
+ *  Members are initialized "in-class".
  */
 
 template<typename TYPE>
-ring_buffer<TYPE>::ring_buffer (size_type sz) :
-    m_buffer        (),
-    m_buffer_size   (0),
-    m_contents_size (0),
-    m_tail          (0),
-    m_head          (0),                    /* supports empty buffer case   */
-    m_size_mask     (0),
-    m_locked        (false),
-    m_contents_max  (0),
-    m_dropped       (0)
+ring_buffer<TYPE>::ring_buffer (size_type sz)
 {
     int power_of_two;
     for (power_of_two = 1; 1 << power_of_two < int(sz); ++power_of_two)
         ;
 
-    size_type psize = size_t(1 << power_of_two);
+    size_type psize { size_t(1 << power_of_two) };
     m_buffer_size = psize;
     m_size_mask = psize - 1;                /* 0xFF... for index safety     */
     initialize();
@@ -291,8 +328,8 @@ template<typename TYPE>
 std::size_t
 ring_buffer<TYPE>::write_space () const
 {
-    size_type t = m_tail;                           /* index for writing    */
-    size_type h = m_head;                           /* index for reading    */
+    size_type t { m_tail };                         /* index for writing    */
+    size_type h { m_head };                         /* index for reading    */
     if (t > h)
         return ((h - t + m_buffer_size) & m_size_mask) - 1;
     else if (t < h)
@@ -318,8 +355,8 @@ template<typename TYPE>
 std::size_t
 ring_buffer<TYPE>::write (const_reference src)
 {
-    size_type result = 0;
-    size_type write_cnt = write_space();
+    size_type result { 0 };
+    size_type write_cnt { write_space() };
     if (write_cnt > 0)
     {
         (void) push_back(src);
@@ -340,8 +377,8 @@ ring_buffer<TYPE>::read_space () const
 {
     if (count() > 0)
     {
-        size_type t = m_tail;                       /* index for writing    */
-        size_type h = m_head;                       /* index for reading    */
+        size_type t { m_tail };                     /* index for writing    */
+        size_type h { m_head };                     /* index for reading    */
         if (t > h)
             return t - h;
         else if (t == h)
@@ -374,8 +411,8 @@ template<typename TYPE>
 std::size_t
 ring_buffer<TYPE>::read (reference dest)
 {
-    size_t result = 0;
-    size_type read_cnt = read_space();
+    size_t result { 0 };
+    size_type read_cnt { read_space() };
     if (read_cnt > 0)
     {
         dest = m_buffer[m_head];
