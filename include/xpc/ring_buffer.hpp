@@ -131,6 +131,10 @@ public:
 
     ring_buffer () = default;
     explicit ring_buffer (size_type sz);
+    ring_buffer (const ring_buffer &) = delete;
+    ring_buffer (ring_buffer &&) = delete;
+    ring_buffer & operator = (const ring_buffer &) = delete;
+    ring_buffer & operator = (ring_buffer &&) = delete;
     ~ring_buffer ();
 
     void initialize (size_type sz = 0);

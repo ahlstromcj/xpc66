@@ -215,7 +215,10 @@ bool
 synchronizer::wait ()
 {
     std::unique_lock<std::mutex> locker(m_helper_mutex);
-    m_condition_var.wait(locker, [this]{ return predicate(); });
+    m_condition_var.wait
+    (
+        locker, [this] { return predicate(); }
+    );
     return predicate();
 }
 

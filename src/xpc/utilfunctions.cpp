@@ -25,7 +25,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2024-04-15
- * \updates       2024-10-27
+ * \updates       2025-12-04
  * \license       GNU GPLv2 or above
  *
  *  Near duplicates of a few functions from the cfg66 library, defined here
@@ -79,7 +79,7 @@ namespace xpc
 {
 
 static bool
-file_name_good (const std:: string & path)
+file_name_good (const std::string & path)
 {
     return ! path.empty();
 }
@@ -114,10 +114,10 @@ user_home (const std::string & appfolder)
 {
     std::string result;
 #if defined PLATFORM_WINDOWS
-    char * env = std::getenv(ENV_HOMEDRIVE);
+    char * env { std::getenv(ENV_HOMEDRIVE) };
     if (not_nullptr(env))
     {
-        char * env2 = std::getenv(ENV_HOMEPATH);
+        char * env2 { std::getenv(ENV_HOMEPATH) };
         if (not_nullptr(env2))
         {
             result += env;              /* "C:"                             */
@@ -125,7 +125,7 @@ user_home (const std::string & appfolder)
         }
     }
 #else
-    char * env = std::getenv(ENV_HOME);
+    char * env { std::getenv(ENV_HOME) };
     if (not_nullptr(env))
         result = std::string(env);      /* "/home/username"                 */
 #endif
@@ -154,10 +154,10 @@ is_a_tty (int fd)
         case STDERR_FILENO: fileno = _fileno(stderr);   break;
         default:            fileno = (-1);              break;
     }
-    int rc = (fileno >= 0) ? _isatty(fileno) : 90 ;
+    int rc { (fileno >= 0) ? _isatty(fileno) : 90 };
     return rc == 1;                             /* fd refers to a terminal  */
 #else
-    int rc = isatty(fd);
+    int rc { isatty(fd) };
     return rc == 1;                             /* fd refers to a terminal  */
 #endif
 }
@@ -170,10 +170,10 @@ is_a_tty (int fd)
 static std::string
 get_client_tag ()
 {
-    static const char * s_color = "\033[1;30m";             /* black    */
-    static const char * s_normal_color = "\033[0m";
-    std::string result = "[";
-    bool showcolor = is_a_tty(STDERR_FILENO);
+    static const char * s_color { "\033[1;30m" };           /* black    */
+    static const char * s_normal_color { "\033[0m" };
+    std::string result { "[" };
+    bool showcolor { is_a_tty(STDERR_FILENO) };
     if (showcolor)
         result += s_color;
 
@@ -300,14 +300,14 @@ get_full_path (const std::string & path)
     std::string result;                         /* default empty result     */
     if (file_name_good(path))
     {
-#if defined PLATFORM_WINDOWS              /* _MSVC not defined in Qt  */
-        char * resolved_path = NULL;            /* what a relic!            */
+#if defined PLATFORM_WINDOWS                    /* _MSVC not defined in Qt  */
+        char * resolved_path { NULL };          /* what a relic!            */
         char temp[256];
         resolved_path = _fullpath(temp, CSTR(path), 256);
         if (not_NULL(resolved_path))
             result = resolved_path;
 #else
-        char * resolved_path = NULL;            /* what a relic!            */
+        char * resolved_path { NULL };          /* what a relic!            */
         resolved_path = realpath(CSTR(path), NULL);
         if (not_NULL(resolved_path))
         {
@@ -336,10 +336,10 @@ get_full_path (const std::string & path)
 bool
 set_current_directory (const std::string & path)
 {
-    bool result = false;
+    bool result { false };
     if (! path.empty())
     {
-        int rcode = S_CHDIR(CSTR(path));
+        int rcode { S_CHDIR(CSTR(path)) };
         result = is_posix_success(rcode);
         if (! result)
             file_error("chdir() failed", path);
@@ -376,14 +376,14 @@ normalize_path (const std::string & path, bool to_unix, bool terminate)
     {
         result = path;
 
-        auto circumpos = result.find_first_of("~");
+        auto circumpos { result.find_first_of("~") };
         if (circumpos != std::string::npos)
         {
             result.replace(circumpos, 1, user_home("xpc66"));    /* Hmmm */
         }
         if (to_unix)
         {
-            auto pos = path.find_first_of("\\");
+            auto pos { path.find_first_of("\\") };
             if (pos != std::string::npos)
                 std::replace(result.begin(), result.end(), '\\', '/');
 
@@ -392,7 +392,7 @@ normalize_path (const std::string & path, bool to_unix, bool terminate)
         }
         else
         {
-            auto pos = path.find_first_of("/");
+            auto pos { path.find_first_of("/") };
             if (pos != std::string::npos)
                 std::replace(result.begin(), result.end(), '/', '\\');
 
@@ -414,12 +414,12 @@ std::string
 current_date_time ()
 {
     static char s_temp[64];
-    static const char * const s_format = "%Y-%m-%d %H:%M:%S";
+    static const char * const s_format { "%Y-%m-%d %H:%M:%S" };
     time_t t;
     std::memset(s_temp, 0, sizeof s_temp);
     time(&t);
 
-    struct tm * tm = localtime(&t);
+    struct tm * tm { localtime(&t) };
     std::strftime(s_temp, sizeof s_temp - 1, s_format, tm);
     return std::string(s_temp);
 }
@@ -449,10 +449,13 @@ widen_string (const std::string & source)
         return std::wstring();          /* trivial case of empty string     */
 
 #if defined SEQ66_PLATFORM_WINDOWS
-    size_t required_length = ::MultiByteToWideChar
-    (
-        CP_UTF8, 0, CSTR(source), int(source.length()), 0, 0
-    );
+    size_t required_length
+    {
+        ::MultiByteToWideChar
+        (
+            CP_UTF8, 0, CSTR(source), int(source.length()), 0, 0
+        )
+    };
     std::wstring result(required_length, L'\0');
     ::MultiByteToWideChar
     (

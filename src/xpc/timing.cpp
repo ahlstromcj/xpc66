@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2005-07-03 to 2007-08-21 (pre-Sequencer24/64/Seq66)
- * \updates       2024-01-17
+ * \updates       2025-12-04
  * \license       GNU GPLv2 or above
  *
  *  Provides support for cross-platform time-related functions.
@@ -107,14 +107,14 @@ std_sleep_us ()
 bool
 millisleep (int ms)
 {
-    bool result = ms >= 0;
+    bool result { ms >= 0 };
     if (result)
     {
 #if defined PLATFORM_LINUX
         result = microsleep(ms * 1000);
 #elif defined PLATFORM_UNIX
         struct timeval tv;
-        struct timeval * tvptr = &tv;
+        struct timeval * tvptr { &tv };
         tv.tv_usec = long(ms % 1000) * 1000;
         tv.tv_sec = long(ms / 1000);
         result = select(0, 0, 0, 0, tvptr) != (-1);
@@ -148,13 +148,13 @@ millisleep (int ms)
 bool
 microsleep (int us)
 {
-    bool result = us > 0;
+    bool result { us > 0 };
     if (result)
     {
         int rc;
         if (us == std_sleep_us())                   /* an optimization      */
         {
-            static bool s_uninitialized = true;
+            static bool s_uninitialized { true };
             static timespec s_ts;
             if (s_uninitialized)
             {
@@ -194,11 +194,11 @@ microsleep (int us)
 bool
 microsleep (int us)
 {
-    bool result = us > 0;
+    bool result { us > 0 };
     if (result)
     {
-        HANDLE timer = CreateWaitableTimer(NULL, TRUE, NULL);
-        bool result = timer != NULL;
+        HANDLE timer { CreateWaitableTimer(NULL, TRUE, NULL) };
+        bool result { timer != NULL };
         if (result)
         {
             LARGE_INTEGER ft;
@@ -308,7 +308,7 @@ microtime ()
 #if defined PLATFORM_WINDOWS__THIS_CODE_IS_READY  // NOT!
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);
-    unsigned long long tt = ft.dwHighDateTime;
+    unsigned long long tt { ft.dwHighDateTime };
     tt <<=32;
     tt |= ft.dwLowDateTime;
     tt /=10;
@@ -363,17 +363,17 @@ millitime ()
 bool
 set_thread_priority (std::thread & t, int p)
 {
-    int minp = sched_get_priority_min(SCHED_FIFO);
-    int maxp = sched_get_priority_max(SCHED_FIFO);
+    int minp { sched_get_priority_min(SCHED_FIFO) };
+    int maxp { sched_get_priority_max(SCHED_FIFO) };
     if (p >= minp && p <= maxp)
     {
         struct sched_param schp;
         memset(&schp, 0, sizeof(sched_param));
         schp.sched_priority = p;                /* Linux range: 1 to 99 */
 #if defined PLATFORM_PTHREADS
-        int rc = pthread_setschedparam(t.native_handle(), SCHED_FIFO, &schp);
+        int rc { pthread_setschedparam(t.native_handle(), SCHED_FIFO, &schp) };
 #else
-        int rc = sched_setscheduler(t.native_handle(), SCHED_FIFO, &schp);
+        int rc { sched_setscheduler(t.native_handle(), SCHED_FIFO, &schp) };
 #endif
         return rc == 0;
     }
@@ -385,7 +385,6 @@ set_thread_priority (std::thread & t, int p)
             temp, sizeof temp,
             "Priority %d outside of range %d-%d", p, minp, maxp
         );
-        //// error_message(temp);
         return false;
     }
 }
@@ -427,11 +426,11 @@ bool
 set_thread_priority (std::thread & t, int p)
 {
 #if defined PLATFORM_WINDOWS__THIS_CODE_IS_READY
-    bool result = false;
+    bool result { false };
     if (p >= THREAD_PRIORITY_NORMAL && p <= THREAD_PRIORITY_HIGHEST)
     {
-        HANDLE hthread = t.native_handle();
-        BOOL ok = SetThreadPriority(hthread, p);
+        HANDLE hthread { t.native_handle() };
+        BOOL ok { SetThreadPriority(hthread, p) };
         result = ok != 0;
         if (! result)
         {
@@ -452,7 +451,7 @@ set_thread_priority (std::thread & t, int p)
 bool
 set_timer_services (bool on)
 {
-    MMRESULT mmr = on ? timeBeginPeriod(1) : timeEndPeriod(1) ;
+    MMRESULT mmr { on ? timeBeginPeriod(1) : timeEndPeriod(1) };
     return mmr == TIMERR_NOERROR;
 }
 

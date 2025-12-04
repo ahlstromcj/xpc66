@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2005-07-03 to 2007-08-21 (pre-Sequencer24/64)
- * \updates       2025-10-27
+ * \updates       2025-12-04
  * \license       GNU GPLv2 or above
  *
  *  Daemonization module of the POSIX C Wrapper (PSXC) library
@@ -286,9 +286,9 @@ daemonize
          *  EXIT_FAILURE.
          */
 
-        pid_t sid = setsid();               /* 2. Get a new session ID...    */
+        pid_t sid { setsid() };             /* 2. Get a new session ID...    */
         if (sid < 0)                        /*    ... couldn't get one       */
-            return daemonization::failure;  /*    exit() child as a failure     */
+            return daemonization::failure;  /*    exit() child as a failure  */
 
         if ((flags & d_flag_no_fork_twice) == 0)
         {
@@ -318,7 +318,7 @@ daemonize
         }
         if ((flags & d_flag_no_chdir) == 0)     /* this is only for ROOT    */
         {
-            int rc = chdir("/");
+            int rc { chdir("/") };
             if (rc != 0)
             {
                 errprint("chdir('/') failed");
@@ -327,7 +327,7 @@ daemonize
         }
         if ((flags & d_flag_no_close_files) == 0)
         {
-            int maxfd = ::sysconf(_SC_OPEN_MAX);
+            int maxfd { int(::sysconf(_SC_OPEN_MAX)) };
             if (maxfd == (-1))
                 maxfd = c_daemonize_max_fd;     /* this is just a guess     */
 
@@ -345,7 +345,7 @@ daemonize
 
         if ((flags & d_flag_no_set_currdir) == 0)
         {
-            bool cwdgood = cwd != "." && ! cwd.empty();
+            bool cwdgood { cwd != "." && ! cwd.empty() };
             if (cwdgood)
             {
                 if (! set_current_directory(cwd))
@@ -402,15 +402,15 @@ undaemonize (mode_t previous_umask)
 bool
 reroute_stdio_to_dev_null ()
 {
-    int rc = STD_CLOSE(STDIN_FILENO);
-    bool result = rc == 0;
+    int rc { STD_CLOSE(STDIN_FILENO) };
+    bool result { rc == 0 };
     if (result)
     {
-        int fd = STD_OPEN(DEV_NULL, STD_O_RDWR);
+        int fd { STD_OPEN(DEV_NULL, STD_O_RDWR) };
         result = fd == STDIN_FILENO;
         if (result)
         {
-            int newfd = STD_DUP2(STDIN_FILENO, STDOUT_FILENO);
+            int newfd { STD_DUP2(STDIN_FILENO, STDOUT_FILENO) };
             result = STD_DUP2_SUCCESS(newfd);
             if (result)
             {
@@ -447,8 +447,8 @@ reroute_stdio_to_dev_null ()
 bool
 close_stdio ()
 {
-    bool result = true;
-    int rc = STD_CLOSE(STDIN_FILENO);
+    bool result { true };
+    int rc { STD_CLOSE(STDIN_FILENO) };
     if (rc == (-1))
         result = false;
 
@@ -466,24 +466,24 @@ close_stdio ()
 bool
 reroute_stdio (const std::string & logfile)
 {
-    bool result = false;
+    bool result { false };
     if (logfile.empty())                    /* route output to /dev/null    */
     {
         result = reroute_stdio_to_dev_null();
     }
     else
     {
-        int rc = STD_CLOSE(STDOUT_FILENO);
+        int rc { STD_CLOSE(STDOUT_FILENO) };
         result = rc == 0;
         if (result)
         {
-            int flags = O_WRONLY | O_CREAT | O_APPEND ;
-            mode_t mode = S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP ;
-            int fd = open(CSTR(logfile), flags, mode);
+            int flags { O_WRONLY | O_CREAT | O_APPEND };
+            mode_t mode { S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP };
+            int fd { open(CSTR(logfile), flags, mode) };
             result = fd != (-1);
             if (result)
             {
-                int newfd = STD_DUP2(fd, STDOUT_FILENO);
+                int newfd { STD_DUP2(fd, STDOUT_FILENO) };
                 result = STD_DUP2_SUCCESS(newfd);
                 if (result)
                 {
@@ -491,8 +491,8 @@ reroute_stdio (const std::string & logfile)
                     result = STD_DUP2_SUCCESS(newfd);
                     if (result)
                     {
-                        std::string logpath = get_full_path(logfile);
-                        std::string normedpath = normalize_path(logpath);
+                        std::string logpath { get_full_path(logfile) };
+                        std::string normedpath { normalize_path(logpath) };
                         printf
                         (
                             "\n'%s' \n'%s' \n'%s' \n",
@@ -524,14 +524,14 @@ reroute_stdio (const std::string & logfile)
  *  Session-handling atomic booleans.
  */
 
-static std::atomic<bool> sg_needs_close {};
-static std::atomic<bool> sg_needs_save {};
-static std::atomic<bool> sg_restart {};
+static std::atomic<bool> sg_needs_close { };
+static std::atomic<bool> sg_needs_save { };
+static std::atomic<bool> sg_restart { };
 
 bool
 session_restart ()
 {
-    bool result = sg_restart;
+    bool result { sg_restart };
     if (sg_needs_close)
         result = false;
 
@@ -545,7 +545,7 @@ session_restart ()
 bool
 session_close ()
 {
-    bool result = sg_needs_close;
+    bool result { sg_needs_close };
 
 #if defined PLATFORM_DEBUG_TMI
     if (result)
@@ -564,7 +564,7 @@ session_close ()
 bool
 session_save ()
 {
-    bool result = sg_needs_save;
+    bool result { sg_needs_save };
 #if defined PLATFORM_DEBUG
     if (result)
         warn_message("Marked for file_save...");
@@ -573,12 +573,14 @@ session_save ()
     return result;
 }
 
-void signal_for_save ()
+void
+signal_for_save ()
 {
     sg_needs_save = true;
 }
 
-void signal_for_exit ()
+void
+signal_for_exit ()
 {
     sg_needs_close = true;
 }
@@ -671,15 +673,15 @@ pid_t
 get_pid_by_name (const std::string & exename)
 {
 #if defined DEFINE_GET_PID_BY_NAME
-    static const int s_pid_size = 200;      /* really only need about 10!   */
-    pid_t result = 0;
+    static const int s_pid_size { 200 };    /* really only need about 10!   */
+    pid_t result { 0 };
     char cmd[s_pid_size + 1];
     snprintf(cmd, s_pid_size, "pidof %s", V(exename));
 
-    FILE * fp = popen(cmd, "r");
+    FILE * fp { popen(cmd, "r") };
     if (not_nullptr(fp))
     {
-        size_t count = fread(cmd, sizeof(char), s_pid_size, fp);
+        size_t count { fread(cmd, sizeof(char), s_pid_size, fp) };
         fclose(fp);
         if (count > 0)
         {
@@ -703,14 +705,14 @@ pid_exists (const std::string & exename)
 std::string
 get_pid ()
 {
-    long p = long(getpid());
+    long p { long(getpid()) };
     return std::to_string(p);
 }
 
 std::string
 get_process_name ()
 {
-    pid_t pid = getpid();
+    pid_t pid { getpid() };
     return get_process_name(pid);
 }
 
@@ -730,10 +732,10 @@ get_process_name (pid_t pid)
     char temp[32];
     snprintf(temp, sizeof temp, "/proc/%d/comm", int(pid));
 
-    FILE * f = fopen(temp, "r");
+    FILE * f { fopen(temp, "r") };
     if (not_nullptr(f))
     {
-        size_t sz = fread(temp, sizeof(char), sizeof temp , f);
+        size_t sz { fread(temp, sizeof(char), sizeof temp , f) };
         if (sz > 0)
         {
             if (temp[sz - 1] == '\n')
@@ -749,7 +751,7 @@ get_process_name (pid_t pid)
 std::string
 get_parent_process_name ()
 {
-    pid_t parentpid = getppid();
+    pid_t parentpid { getppid() };
     return get_process_name(parentpid);
 }
 
@@ -782,14 +784,14 @@ get_pid_by_name (const std::string & /*exename*/)
 std::string
 get_pid ()
 {
-    long p = long(_getpid());
+    long p { long(_getpid()) };
     return std::to_string(p);
 }
 
 std::string
 get_process_name ()
 {
-    pid_t pid = _getpid();
+    pid_t pid { _getpid() };
     return get_process_name(pid);
 }
 
@@ -801,7 +803,8 @@ get_process_name (pid_t /*pid*/)
 }
 
 /*
- * See https://stackoverflow.com/questions/29939893/get-parent-process-name-windows
+ * See https://stackoverflow.com/questions/29939893/
+ *      get-parent-process-name-windows
  */
 
 std::string

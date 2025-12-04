@@ -24,7 +24,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2015-07-24
- * \updates       2024-01-16
+ * \updates       2025-12-03
  * \license       GNU GPLv2 or above
  *
  *  Seq66 needs a mutex for sequencer operations. We have finally, after a
@@ -111,7 +111,7 @@ recmutex::native recmutex::sm_global_mutex;
 void
 recmutex::init_global_mutex ()
 {
-    static bool s_global_mutex_initialized = false;
+    static bool s_global_mutex_initialized { false };
     if (! s_global_mutex_initialized)
     {
         s_global_mutex_initialized = true;
@@ -129,7 +129,7 @@ recmutex::recmutex () :
 #if defined PLATFORM_FREEBSD
     m_mutex_attributes  (),             /* uninit'd pthread_mutexattr_t     */
 #endif
-    m_mutex_lock () /* uninitialized pthread_mutex_t    */
+    m_mutex_lock ()                     /* uninitialized pthread_mutex_t    */
 {
 #if defined USE_GLOBAL_MUTEX
     init_global_mutex();                /* might not need global mutex, tho */
@@ -203,7 +203,7 @@ recmutex::unlock () const
 void
 recmutex::init ()
 {
-    int rc = pthread_mutexattr_init(&m_mutex_attributes);
+    int rc { pthread_mutexattr_init(&m_mutex_attributes) };
     if (rc == 0)
     {
         rc = pthread_mutexattr_settype
@@ -224,7 +224,7 @@ recmutex::init ()
 void
 recmutex::destroy ()
 {
-    int rc = pthread_mutex_unlock(&m_mutex_lock);
+    int rc { pthread_mutex_unlock(&m_mutex_lock) };
     if (rc == 0)
     {
         rc = pthread_mutex_destroy(&m_mutex_lock);
@@ -270,7 +270,7 @@ recmutex::init ()
 #if defined XPC66_USE_MUTEX_INITIALIZER
     m_mutex_lock = MUTEX_INITIALIZER;
 #else
-    int rc = pthread_mutex_init(&m_mutex_lock, NULL);
+    int rc { pthread_mutex_init(&m_mutex_lock, NULL) };
     if (rc != 0)
     {
         // what to do?

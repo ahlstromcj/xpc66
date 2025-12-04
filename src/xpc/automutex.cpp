@@ -24,7 +24,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2015-07-24
- * \updates       2024-04-17
+ * \updates       2025-12-03
  * \license       GNU GPLv2 or above
  *
  *  Seq66 needs a recursive mutex and a condition-variable for sequencer
@@ -58,7 +58,7 @@ recmutex s_common_mutex;
 bool
 thread_1_locking ()
 {
-    automutex m{s_common_mutex};
+    automutex m { s_common_mutex };
     std::printf("Thread 1 in\n");
     return true;
 }
@@ -66,7 +66,7 @@ thread_1_locking ()
 bool
 thread_2_locking ()
 {
-    automutex m{s_common_mutex};
+    automutex m { s_common_mutex };
     std::printf("Thread 2 in\n");
     return true;
 }

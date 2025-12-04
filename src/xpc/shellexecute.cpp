@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-05-19
- * \updates       2025-10-27
+ * \updates       2025-12-04
  * \license       GNU GPLv2 or above
  *
  *  Provides support for cross-platform time-related functions.
@@ -48,10 +48,10 @@ namespace xpc
 bool
 command_line (const std::string & cmdline)
 {
-    bool result = ! cmdline.empty();
+    bool result { ! cmdline.empty() };
     if (result)
     {
-        int rc = std::system(CSTR(cmdline));
+        int rc { std::system(CSTR(cmdline)) };
         result = rc == 0;
         if (! result)
             (void) file_error("Command failed", cmdline);
@@ -71,7 +71,7 @@ command_line (const std::string & cmdline)
 bool
 open_pdf (const std::string & pdfspec)
 {
-    std::string cmd = "";                   // usr().user_pdf_viewer();
+    std::string cmd { "" };                 // usr().user_pdf_viewer();
     if (cmd.empty())
     {
         return open_document(pdfspec);
@@ -90,7 +90,7 @@ open_pdf (const std::string & pdfspec)
 bool
 open_url (const std::string & url)
 {
-    std::string cmd = "";                   // usr().user_browser();
+    std::string cmd { "" };                 // usr().user_browser();
     if (cmd.empty())
     {
         return open_document(url);
@@ -122,10 +122,10 @@ open_local_url (const std::string & url)
 bool
 open_document (const std::string & documentpath)
 {
-    bool result = ! documentpath.empty();
+    bool result { ! documentpath.empty() };
     if (result)
     {
-        std::string cmd = "/usr/bin/xdg-open";
+        std::string cmd { "/usr/bin/xdg-open" };
         cmd += " ";
         cmd += documentpath;
         cmd += "&";
@@ -191,24 +191,24 @@ open_document (const std::string & documentpath)
 bool
 open_document (const std::string & documentpath)
 {
-    bool result = ! documentpath.empty();
+    bool result { ! documentpath.empty() };
     if (result)
     {
 #if defined PLATFORM_WINDOWS_32
-        std::string op = "open";
-        std::string path = documentpath;
-        HINSTANCE rc = ::ShellExecute
-        (
-            NULL, CSTR(op), CSTR(path), NULL, NULL, SW_SHOW
-        );
+        std::string op { "open" };
+        std::string path { documentpath };
+        HINSTANCE rc
+        {
+            ::ShellExecute(NULL, CSTR(op), CSTR(path), NULL, NULL, SW_SHOW)
+        };
         result = uintptr_t(rc) > 32;
 #else
-        std::wstring op = widen_string("open");
-        std::wstring path = widen_string(documentpath);
-        HINSTANCE rc = ::ShellExecute
-        (
-            NULL, CSTR(op), CSTR(path), NULL, NULL, SW_SHOW
-        );
+        std::wstring op { widen_string("open") };
+        std::wstring path { widen_string(documentpath) };
+        HINSTANCE rc
+        {
+            ::ShellExecute(NULL, CSTR(op), CSTR(path), NULL, NULL, SW_SHOW)
+        };
         result = uintptr_t(rc) > 32;
 #endif
         if (! result)

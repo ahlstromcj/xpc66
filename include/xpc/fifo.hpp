@@ -44,18 +44,7 @@
 #include <queue>
 
 #include "lib_build_macros.h"           /* PLATFORM_DEBUG macro, etc.       */
-
-#undef  XPC66_USE_MEMORY_LOCK           /* TODO: needs a lot of work !      */
-#undef  XPC66_USE_AUTOMUTEX             /* TODO                             */
-
-#if defined XPC66_USE_MEMORY_LOCK
-#include <sys/mman.h>
-#endif
-
-#if defined XPC66_USE_AUTOMUTEX
-#include "xpc/automutex.hpp"            /* xpc::automutex                   */
-#include "xpc/recmutex.hpp"             /* xpc::recmutex                    */
-#endif
+#include "xpc/automutex.hpp"            /* xpc::automutex and xpc::recmutex */
 
 namespace xpc
 {
@@ -91,16 +80,12 @@ private:
 
     size_type m_queue_size { 32 };
 
-#if defined XPC66_USE_AUTOMUTEX
-
     /**
      *  The locking mutex.  This object is passed to an automutex object that
      *  lends exception-safety to the mutex locking.
      */
 
     mutable xpc::recmutex m_mutex { };
-
-#endif
 
     /**
      *  Indicates whether the size of the queue is limited or not,
@@ -125,7 +110,11 @@ private:
 public:
 
     fifo (size_type sz = 0);
-    ~fifo ();
+    fifo (const fifo &) = delete;
+    fifo (fifo &&) = delete;
+    fifo & operator = (const fifo &) = delete;
+    fifo & operator = (fifo &&) = delete;
+    ~fifo () = default;
 
     bool mlock ();
 
@@ -146,7 +135,8 @@ public:
     }
 
     /**
-     *  The number of active entries in the queue.
+     *  The number of active entries in the queue. Are these next few
+     *  functions worth locking?
      */
 
     int count () const
@@ -167,12 +157,19 @@ public:
     bool push (const value_type & value);
     value_type pop ();
 
+#if defined USE_FRONT_BACK_REFERENCE_RETURN
+
     /*
-     * Returns reference to the first element in the queue. This element will
-     * be the first element to be removed on a call to pop().  The return
-     * value might not be valid, either a default-constructed object or an
-     * old and "overwritten" value. An alternative is to call the read()
-     * function and check the return value.
+     *  Returns reference to the first element in the queue. This element will
+     *  be the first element to be removed on a call to pop().  The return
+     *  value might not be valid, either a default-constructed object or an
+     *  old and "overwritten" value. An alternative is to call the read()
+     *  function and check the return value.
+     *
+     *  Note that there's no real way to lock the front()/back() functions
+     *  safely for the caller.
+     *
+     *  We might want to return an object instead of a reference.
      */
 
     reference front ()
@@ -204,6 +201,24 @@ public:
         return count() > 0 ? m_queue.back() : s_dummy ;
     }
 
+#else
+
+    value_type front () const
+    {
+        xpc::automutex locker(m_mutex);
+        static value_type s_dummy;
+        return count() > 0 ? m_queue.front() : s_dummy ;
+    }
+
+    value_type back () const
+    {
+        xpc::automutex locker(m_mutex);
+        static value_type s_dummy;
+        return count() > 0 ? m_queue.back() : s_dummy ;
+    }
+
+#endif      // defined USE_FRONT_BACK_REFERENCE_RETURN
+
 private:    // helper functions
 
     void initialize ();
@@ -230,19 +245,6 @@ fifo<TYPE>::fifo (size_type sz)
         m_infinite = false;             /* otherwise the growth is endless  */
     }
     initialize();
-}
-
-/**
- *  Free all data associated with the ringbuffer `m_rb'.
- */
-
-template<typename TYPE>
-fifo<TYPE>::~fifo ()
-{
-#if defined XPC66_USE_MEMORY_LOCK
-    if (m_locked)
-        ::munlock(m_queue, m_queue_size);
-#endif
 }
 
 /**
@@ -298,9 +300,7 @@ template<typename TYPE>
 bool
 fifo<TYPE>::push (const value_type & item)
 {
-#if defined XPC66_USE_AUTOMUTEX
     xpc::automutex locker(m_mutex);
-#endif
     if (m_infinite || m_queue.size() < m_queue_size)
     {
         m_queue.push(item);
@@ -323,9 +323,7 @@ template<typename TYPE>
 typename fifo<TYPE>::value_type
 fifo<TYPE>::pop ()
 {
-#if defined XPC66_USE_AUTOMUTEX
     xpc::automutex locker(m_mutex);
-#endif
     static value_type s_dummy;
     if (m_queue.size() > 0)
     {

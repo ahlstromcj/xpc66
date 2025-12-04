@@ -27,7 +27,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2015-07-24
- * \updates       2024-01-16
+ * \updates       2025-12-03
  * \license       GNU GPLv2 or above
  *
  *  This recursive mutex is implemented in pthreads due to difficulties we had
@@ -66,7 +66,7 @@
  *  C++ mutex, as noted above.
  */
 
-#include "platform_macros.h"      /* pick the compiler and platform   */
+#include "platform_macros.h"            /* pick the compiler and platform   */
 
 #include <pthread.h>
 
@@ -125,10 +125,10 @@ private:
 public:
 
     recmutex ();
-    recmutex (recmutex &&) = delete;
     recmutex (const recmutex &);
-    recmutex & operator = (recmutex &&) = delete;
+    recmutex (recmutex &&) = delete;
     recmutex & operator = (const recmutex &);
+    recmutex & operator = (recmutex &&) = delete;
     ~recmutex ();
 
     void lock () const;

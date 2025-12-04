@@ -102,6 +102,8 @@ test_kbget ()
     return true;
 }
 
+#if defined TEST_SHELL_EXECUTION
+
 /*
  * Test of shellexecute functions. It assumes the test is being run
  * from the project top-level directory.
@@ -130,6 +132,8 @@ test_shell_execution ()
     }
     return result;
 }
+
+#endif  // TEST_SHELL_EXECUTION
 
 }   // namespace anonymous
 

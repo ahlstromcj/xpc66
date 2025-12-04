@@ -27,7 +27,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2015-07-24
- * \updates       2024-04-15
+ * \updates       2025-12-03
  * \license       GNU GPLv2 or above
  *
  *  This module defines the following classes:
@@ -68,7 +68,9 @@ private:                        /* do not allow these functions to be used  */
 
     automutex () = delete;
     automutex (const automutex &) = delete;
+    automutex (automutex &&) = delete;
     automutex & operator = (const automutex &) = delete;
+    automutex & operator = (automutex &&) = delete;
 
 public:
 
