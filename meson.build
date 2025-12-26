@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2025-10-05
+# \updates     2025-12-26
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. It was part of the libs66
@@ -178,8 +178,8 @@ endif
 
 cc = meson.get_compiler('cpp')
 cdata = configuration_data()
-cdata.set('fcntl_h', cc.has_header('fcntl.h'))
-cdata.set('limits_h', cc.has_header('limits.h'))
+cdata.set10('fcntl_h', cc.has_header('fcntl.h'))
+cdata.set10('limits_h', cc.has_header('limits.h'))
 
 #-----------------------------------------------------------------------------
 # Potential sub-projects

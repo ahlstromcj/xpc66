@@ -21,7 +21,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2005-07-03 to 2007-08-21 (pre-Sequencer24/64)
- * \updates       2025-12-04
+ * \updates       2025-12-26
  * \license       GNU GPLv2 or above
  *
  *  Daemonization module of the POSIX C Wrapper (PSXC) library
@@ -92,7 +92,7 @@
 
 #if defined PLATFORM_UNIX               // PLATFORM_LINUX
 
-#if XPC66_HAVE_FCNTL_H                  /* xcp-config.h.in                  */
+#if HAVE_FCNTL_H                        /* xcp-config.h.in                  */
 #include <fcntl.h>                      /* O_RDWR flag                      */
 #else
 #error The daemonize module requires fcntl.h
@@ -123,7 +123,7 @@
  */
 
 #include <windows.h>                    /* WaitForSingleObject(), INFINITE  */
-#if XPC66_HAVE_FCNTL_H                  /* xcp-config.h.in                  */
+#if HAVE_FCNTL_H                        /* xcp-config.h.in                  */
 #include <fcntl.h>                      /* _O_RDWR                          */
 #else
 #error The daemonize module requires fcntl.h

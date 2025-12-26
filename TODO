@@ -1,0 +1,10 @@
+TO DO for Xpc66 0.2
+Chris Ahlstrom
+2025-10-05 to 2025-10-05
+
+    -   Write a small program to convert between errno values,
+        their simple strings, and the perror(3) value.
+    -   Use the CSTR macros
+
+
+# vim: sw=4 ts=4 wm=4 et ft=sh
