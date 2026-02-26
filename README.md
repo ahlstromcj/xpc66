@@ -1,4 +1,4 @@
-# README for Library Xpc66 0.2.0 2025-12-03
+# README for Library Xpc66 0.2.0 2026-02-26
 
 __Xpc66__ is a cross-platform utilities library based on the "util" and "os"
 directories of the __Seq66__ project, but that is useful in other applications.
@@ -26,7 +26,7 @@ Support sites (still in progress):
     *   Functions for executing command lines and displaying URLs or
         PDFs in Linux/UNIX and Windows.
     *   Functions for measuring time and "sleeping".
-    *   Basic dependencies: Meson 1.1 and above; C++14 and above.
+    *   Basic dependencies: Meson 1.1 and above; C++17 and above.
     *   The build system is Meson, and sample wrap files are provided
         for using Xpc66 as a C++ subproject.
     *   PDF documentation built from LaTeX.
@@ -36,7 +36,7 @@ Support sites (still in progress):
     *   The code is a mix of hard-core C++ and C-like functions.
     *   The C++ STL and advanced language features are used as much as
     *   possible
-    *   C++14 is required for some of its features.
+    *   C++17 is required for some of its features.
     *   The GNU and Clang C++ compilers are supported.
     *   Broken into modules for easier maintenance.
 
