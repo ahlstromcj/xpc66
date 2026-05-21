@@ -28,7 +28,7 @@
  * \library       xpc66 application
  * \author        Chris Ahlstrom
  * \date          2022-09-19
- * \updates       2025-12-03
+ * \updates       2026-05-21
  * \license       GNU GPLv2 or above
  */
 
@@ -528,7 +528,7 @@ ring_buffer<TYPE>::push_back (const value_type & item)
 }
 
 /*
- *  Free functions (for testing the ring_buffer).
+ *  Free function for testing the ring_buffer.
  */
 
 #if defined PLATFORM_DEBUG

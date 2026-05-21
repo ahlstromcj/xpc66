@@ -25,7 +25,7 @@
  * \library       xpc66 application
  * \author        Chris Ahlstrom
  * \date          2022-09-19
- * \updates       2025-12-03
+ * \updates       2026-05-21
  * \license       GNU GPLv2 or above
  *
  *  A lock-free ring buffer.
@@ -202,6 +202,12 @@ ring_test::to_string () const
     result += "text '" + test_text() + "'.";
     return result;
 }
+
+/*
+ *  Free function for testing the ring_buffer.
+ */
+
+#if defined PLATFORM_DEBUG
 
 bool
 run_ring_test ()
@@ -429,6 +435,8 @@ run_ring_test ()
 
     return result;
 }
+
+#endif      // defined PLATFORM_DEBUG
 
 #endif
 

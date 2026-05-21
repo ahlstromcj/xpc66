@@ -24,7 +24,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-07-03
- * \updates       2025-12-03
+ * \updates       2026-05-21
  * \license       See above.
  *
  *  To do: add a help-line for each option.
@@ -153,11 +153,15 @@ main (int /*argc*/, char * /*argv*/ [])
     if (success)
         success = test_kbget();
 
+#if defined PLATFORM_DEBUG
+
     if (success)
         success = xpc::run_ring_test();
 
     if (success)
         success = xpc::run_fifo_test();
+
+#endif
 
 #if defined TEST_SHELL_EXECUTION
 

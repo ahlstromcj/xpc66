@@ -336,7 +336,7 @@ fifo<TYPE>::pop ()
 }
 
 /*
- *  Free functions (for testing the fifo).
+ *  Free function for testing the fifo.
  */
 
 #if defined PLATFORM_DEBUG

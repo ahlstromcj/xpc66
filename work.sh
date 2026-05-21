@@ -8,7 +8,7 @@
 # \library        xpc66
 # \author         Chris Ahlstrom
 # \date           2024-02-06
-# \update         2025-11-01
+# \update         2026-05-21
 # \version        $Revision$
 # \license        $XPC_SUITE_GPL_LICENSE$
 #
@@ -24,255 +24,342 @@
 #
 #     Also see:  https://mesonbuild.com/Creating-releases.html
 #
+#     For the values needs for the "CROSS" "PATHS", see meson.mingw.cross.
+#     We're still working the issues for this.
+#
 #------------------------------------------------------------------------------
 
 LANG=C
 export LANG
 CYGWIN=binmode
 export CYGWIN
-export XPC66_SCRIPT_EDIT_DATE="2025-11-01"
-export XPC66_LIBRARY_API_VERSION="0.2"
+export XPC66_SCRIPT_EDIT_DATE="2026-05-21"
+export XPC66_LIBRARY_API_VERSION="0.1"
 export XPC66_LIBRARY_VERSION="$XPC66_LIBRARY_API_VERSION.0"
 export XPC66="xpc66"
-export XPC66_LIBRARY="$XPC66-XPC66_LIBRARY_API_VERSION"
+export XPC66_LIBRARY="$XPC66-$XPC66_LIBRARY_API_VERSION"
 
-PLATFORM="UNIX"
-INSTALL_PREFIX="/usr/local"         # "/usr", what about Windows?
+# Settings.
+
+BASE_BUILD_DIR="build"              # 'cfg66/build'
+BUILD_DIR="$BASE_BUILD_DIR/cc"      # "native" compiler (CC/CXX) build
+BUILD_TYPE="release"
+CROSS_PKG_PATH="/usr/lib/pkgconfig" # TO DO TO DO
+EXTRAFLAGS=""
 INSTALL_LIBDIR="lib"                # "lib/x86_64-linux-gnu" on Debian
+INSTALL_PREFIX="/usr/local"         # "/usr", what about Windows?
+MAKEFILE="$BUILD_DIR/build.ninja"
+MAKELOG="make.log"
+PLATFORM="UNIX"
+POTEXTDEF=""
+TAGSTRING="pack"
+
+# Flags.
 
 DOCLANG="no"         # --clang. Default is the native compiler.
-DOGNU="no"           # --gnu. Default is the native compiler.
 DOCLEAN="no"         # --clean
-DODEBUG="yes"        # --debug. This is the default Meson build.
+DOCROSS="no"         # --cross. Build for Windows using a cross-file.
+DODEBUG="no"         # --debug. Build for debuggin in build/debug
 DODIST="no"          # --dist. Use Meson "dist" to create a package.
+DOGNU="no"           # --gnu. Default is the native compiler.
 DOHELP="no"          # --help. Duh!
 DOINSTALL="no"       # --install. Requires the release be built already.
+DOMAKE="yes"         # Default action after creating the build directory.
+DOMAKEPDF="no"       # --pdf. Make the manual, always as a separate step.
+DONSIS="no"          # --nsis. Make an NSIS Windows installer.
+DOOPTHELP="no"       # --option-help. Duh!
+DOPACK="no"          # --pack. Clean and create a tar-file.
+DOPOTEXT="no"        # --potext. Use translation [NOT YET SUPPORTED].
+DORELEASE="yes"      # --release. as opposed to debug; also PDF is made.
+DOREMAKE="no"        # currently UNUSED
+DOSETUP="no"         # --setup. Do the setup and then exit.
+DOSTATIC="yes"       # --static
 DOUNINSTALL="no"     # --uninstall. Like --install, requires sudo/root.
 DOUPDATE="no"        # --update. Force a subproject update.
-DOMAKE="yes"         # Default action after creating the build directory.
-DOREMAKE="no"        # currently UNUSED
-DOMAKEPDF="no"       # --pdf. Make the manual, always as a separate step.
-DOPOTEXT="no"
-DOPACK="no"          # --pack. Clean and create a tar-file.
-DORELEASE="no"       # --release. as opposed to debug; also PDF is made.
-DOSTATIC="yes"       # --static
 DOVERSION="no"       # --version. Duouble duh!
-EXTRAFLAGS=""
-MAKEFILE="./build/build.ninja"
-TAGSTRING="pack"
 
 #******************************************************************************
 #  Brute-force options loop
 #------------------------------------------------------------------------------
 
-if test $# -ge 1 ; then
+get_options () {
+   if test $# -ge 1 ; then
 
-   while [ "$1" != "" ] ; do
+      while [ "$1" != "" ] ; do
 
-      case "$1" in
+         case "$1" in
 
-         --clang)
-            DOCLANG="yes"
-            ;;
+            --make)
+               DOMAKE="yes"
+               ;;
 
-         --gnu)
-            DOGNU="yes"
-            ;;
+            --build)
+               if test "$DOCLEAN" = "no" ; then
+                  DOMAKE="yes"
+               fi
+               shift
+               case $1 in
+                  -*)
+                     continue
+                  ;;
+               esac
+               BUILD_DIR="$BASE_BUILD_DIR/$1"
+               ;;
 
-         --clean)
-            DOCLEAN="yes"
-            DOMAKE="no"
-            ;;
+            --cross)
+               DOMAKE="yes"
+               DOCROSS="yes"
+               BUILD_DIR="$BASE_BUILD_DIR/cross"
+               MAKEFILE="$BUILD_DIR/build.ninja"
+               MAKELOG="$BUILD_DIR/make.log"
+               CROSSENVSET="PKG_CONFIG_PATH=$CROSS_PKG_PATH:$PKG_CONFIG_PATH"
+               export $CROSSENVSET
+               echo "CROSSENVSET: PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+               ;;
 
-         --help)
-            DOHELP="yes"
-            DOMAKE="no"
-            ;;
+            --clean)
+               DOCLEAN="yes"
+               DOSETUP="no"
+               DOMAKE="no"
+               ;;
 
-         --update)
-            DOUPDATE="yes"
-            DOMAKE="no"
-            ;;
+            --dist)
+               DODIST="yes"
+               DOMAKE="no"
+               DOSETUP="no"
+               ;;
 
-         --build | --make)
-            DOMAKE="yes"
-            ;;
+            --clang)
+               DOCLANG="yes"
+               echo "Using the Clang C/C++ compilers..."
+               export CC=clang
+               export CXX=clang++
+               BUILD_DIR="$BASE_BUILD_DIR/clang"
+               MAKEFILE="$BUILD_DIR/build.ninja"
+               ;;
 
-         --potext)
-            DOMAKE="yes"
-            DOPOTEXT="yes"
-            ;;
+            --gnu | gcc)
+               DOGNU="yes"
+               echo "Using the GNU C/C++ compilers..."
+               export CC=gcc
+               export CXX=g++
+               BUILD_DIR="$BASE_BUILD_DIR/gcc"
+               MAKEFILE="$BUILD_DIR/build.ninja"
+               ;;
 
-         --install)
-            DOINSTALL="yes"
-            DOMAKE="no"
-            ;;
+            --help)
+               DOHELP="yes"
+               DOMAKE="no"
+               ;;
 
-         --uninstall)
-            DOUNINSTALL="yes"
-            DOMAKE="no"
-            ;;
+            --install)
+               DOINSTALL="yes"
+               DOMAKE="no"
+               DOSETUP="no"
+               ;;
 
-         --dist)
-            DODIST="yes"
-            DOMAKE="no"
-            ;;
+            --option-help)
+               DOOPTHELP="yes"
+               DOMAKE="no"
+               DOSETUP="no"
+               ;;
 
-         --pdf)
-            DOMAKEPDF="yes"
-            DOMAKE="no"
-            ;;
+            --pack)
+               DOCLEAN="yes"
+               DOMAKE="no"
+               DOSETUP="no"
+               DOPACK="yes"
+               ;;
 
-         --pack)
-            DOCLEAN="yes"
-            DOMAKE="no"
-            DOPACK="yes"
-            ;;
+            --pdf)
+               DOMAKEPDF="yes"
+               DOMAKE="no"
+               DOSETUP="no"
+               ;;
 
-         --debug)
-            DOMAKE="yes"
-            DODEBUG="yes"
-            DORELEASE="no"
-            ;;
+            --nsis)
+               DONSIS="yes"
+               DOMAKE="no"
+               DOSETUP="no"
+               ;;
 
-         --release)
-            DOMAKE="yes"
-            DORELEASE="yes"
-            DODEBUG="no"
-            DOMAKEPDF="yes"
-            ;;
+            --potext)
+               DOMAKE="yes"
+               DOPOTEXT="yes"
+               POTEXTDEF="-Dpotext=true"
+               ;;
 
-         --static)
-            DORELEASE="yes"
-            DODEBUG="no"
-            DOSTATIC="yes"
-            ;;
+            --rebuild | --remake)
+               DOREMAKE="yes"
+               DOCLEAN="yes"
+               DOMAKE="yes"
+               ;;
 
-         --version)
-            DOVERSION="yes"
-            DOBOOTSTRAP="no"
-            ;;
+            --setup)
+               DOCLEAN="yes"
+               DOMAKE="no"
+               DOSETUP="yes"
+               ;;
 
-         *)
-            if test "$DOPACK" = "no" ; then
-               echo "? Unsupported work option; --help for more information"
-               exit 1
-            else
-               TAGSTRING="$1"
-            fi
-            ;;
+            --uninstall)
+               DOUNINSTALL="yes"
+               DOMAKE="no"
+               DOSETUP="no"
+               ;;
 
-      esac
-      shift
-   done
-fi
+            --update)
+               DOUPDATE="yes"
+               DOMAKE="no"
+               DOSETUP="no"
+               ;;
+
+            --windows)
+               BUILD_DIR="$BASE_BUILD_DIR/windows"
+               MAKEFILE="$BUILD_DIR/build.ninja"
+               ;;
+
+            --debug)
+               if test "$DOCLEAN" = "no" ; then
+                  DOMAKE="yes"
+               fi
+               DODEBUG="yes"
+               DORELEASE="no"
+               BUILD_TYPE="debug"
+               BUILD_DIR="$BASE_BUILD_DIR/debug"
+               MAKEFILE="$BUILD_DIR/build.ninja"
+               ;;
+
+            --release)
+               DOMAKE="yes"
+               DORELEASE="yes"
+               DODEBUG="no"
+               BUILD_TYPE="release"
+               ;;
+
+            --static)
+               DORELEASE="yes"
+               DODEBUG="no"
+               DOSTATIC="yes"
+               ;;
+
+            --version)
+               DOVERSION="yes"
+               DOBOOTSTRAP="no"
+               ;;
+
+            *)
+               if test "$DOPACK" = "no" ; then
+                  echo "? Unsupported work option; --help for more information"
+                  exit 1
+               else
+                  TAGSTRING="$1"
+               fi
+               ;;
+
+         esac
+         shift
+      done
+   fi
+}
 
 #******************************************************************************
 #  Version info
 #------------------------------------------------------------------------------
 
-if test "$DOVERSION" = "yes" ; then
-   echo "Potext version $XPC66_LIBRARY_VERSION $XPC66_SCRIPT_EDIT_DATE"
-   exit 0
-fi
+show_version () {
+   echo "Cfg66 version $CFG66_LIBRARY_VERSION $CFG66_SCRIPT_EDIT_DATE"
+}
 
 #******************************************************************************
 #  Help
 #------------------------------------------------------------------------------
 
-if test "$DOHELP" = "yes" ; then
-
+show_help () {
    cat << E_O_F
 Usage: ./work [options]    ($XPC66_LIBRARY_VERSION-$XPC66_SCRIPT_EDIT_DATE)
 
-'work' encapsulates some common operations involving Meson, builds, packing,
-and version information.  Only implemented options are shown here; there will
-be more to come. Some options might not work on Windows.
+'work.sh' encapsulates common operations involving Meson, builds,
+packing, and version information.  Some options might not work on Windows.
+Many of these commands are best used when setting up the build
+(i.e. do a --clean option first).
 
- --make or --build   Build the code in 'build'. The default operation.
+ --make              Set up and build the code in 'build'. Default operation.
+ --build [dir]       Same as --make, but if given, the build directory is
+                     'build/dir'.
+ --cross             Set up to build a Windows executable, and build it.
+                     Not workable yet; see mingw-qt-build.text.
+ --setup             Run 'meson setup', and that's all.
  --update            Force an update of the subprojects.
  --potext            Build with Potext (light gettext) library sypport.
- --release           Build release version (Meson defaults to a debug version).
-                     Also builds the PDF documentation.
- --install           Run 'meson install' to install the library and PDF.
+ --release           Build release version (the default).
+ --debug             Build debug version. Always builds in 'build/debug'.
+ --install           Run 'meson install' to install Seq66 and the PDF manual.
  --uninstall         Run 'ninja uninstall' to uninstall the library.
                      Some directories might remain; there is a error about
                      one header file not being found... strange.
  --dist              Make a Meson dist package and exit.
- --clang             Rebuild the code using the Clang compilers.
- --pdf               Build just the PDF documentation and exit. In progress.
+ --windows           On Windows, set up 'build/windows' and build it using
+                     the mingw install. Build directory is 'build/windows'.
+ --clang             Rebuild the code using the Clang compilers. Exports CC
+                     and CXX. Build directory is 'build/clang'.
+ --gnu, --gcc        Use the GNU compilers (the default on Linux). Exports CC
+                     and CXX. Build directory is 'build/gcc'. If the
+                     compiler is not specified, the build is in 'build/cc'.
+ --pdf    *********  Build the PDF documentation. Currently done not by
+                     doc/latex/tex/meson.build, but by calling
+                     doc/latex/make_pdf.sh.
+ --nsis   *********  Use NSIS to make a Windows installer on Linux.
  --clean             Delete the usual derived files from the project. Also
-                     do "git checkout doc/xpc66-library-guide.pdf"
+                     do "git checkout doc/cfg66-dev-manual.pdf"
+ --rebuild           Clean the project and build from scratch.
  --pack [ tag ]      A simple quick packaging of the code; the tag goes
                      into the tarball name.
  --help              Show this help text.
  --version           Show only the version information.
-
+ --option-help       Show the project options available. They can be used
+                     as "-Doption=value" when using meson directly
+                     (instead of through the work.sh script).
 E_O_F
    exit 0
+}
 
-fi
+#******************************************************************************
+#  PDF
+#------------------------------------------------------------------------------
 
-if test "$DODIST" = "yes" ; then
-
-   meson dist
-   exit 0
-
-fi
-
-# Make the PDF, then exist if not creating a release.
-
-if test "$DOMAKEPDF" = "yes" ; then
-
+make_pdf () {
    cd doc/latex
    ./make_pdf.sh
    cd ../..
-   if test "$DORELEASE" = "no" ; then
-      exit 0
-   fi
-fi
+}
 
-# This removes the work products, but leaves the README intact.
+#******************************************************************************
+# Remove all the sub-directories of ./build. All build products
+# go into a sub-directory.
+#------------------------------------------------------------------------------
 
-PROJECTSDIR="libraries"
+clean_build () {
 
-if test $DOCLEAN = "yes" ; then
-   rm -rf build/doc/
-   rm -rf build/doxlatex/
-   rm -rf build/include/
-   rm -rf build/latex/
-   rm -rf build/src/
-   rm -rf build/subprojects/
-   rm -rf build/tests/
-   rm -rf build/meson*
-   rm -rf build/lib*
-   rm -f build/.ninja_deps
-   rm -f build/.ninja_log
-   rm -f build/*.h
-   rm -f build/*.log
-   rm -f build/*.so
-   rm -f $MAKEFILE
-   rm -f build/compile_commands.json
-   rm -rf wipe/
-   rm -rf subprojects/liblib66/
-   rm -rf subprojects/potext
-   rm -f subprojects/.wraplock
+   for DIR in $BASE_BUILD_DIR/*/ ; do
+      echo "Deleting $DIR"
+      rm -rf $DIR
+   done
+
    rm -f doc/dox/*.log
    rm -f doc/latex/*.log
-   echo "Build products removed from the xpc66/build directory."
-   git checkout doc/xpc66-library-guide.pdf
-   echo "Previous version of library guide restored."
-# Problematic when making a release. Just remember to do it.
-#  rm -f doc/latex/*.log
-#  echo "Build products removed from the cfg66/build directory."
-#  git checkout doc/cfg66-library-guide.pdf tests/data/fooout.rc
+   echo "Build products removed from the seq66/build sub-directories."
+   rm -rf subprojects/libcfg66/
+   rm -rf subprojects/liblib66/
+   rm -rf subprojects/potext/          # available, but code not prep'ed
+   echo "Subproject downloaded libraries removed from 'subprojects'."
+
+#  git checkout data/share/doc/seq66-dev-manual.pdf
 #  echo "Previous version of developer guide restored."
-fi
+#  Problematic when making a release. Just remember to do it.
 
-# This is just a quick pack, with date and branch information added.
+}
 
-if test $DOPACK = "yes" ; then
-
+make_pack () {
    CURRENTDATE=$(date +%Y-%m-%d)
    CURRENTDIR=$(pwd)
    WORKINGDIR=${CURRENTDIR##/*/}       # strip all but last part of path
@@ -320,111 +407,75 @@ if test $DOPACK = "yes" ; then
       echo "  Are you running pack from the proper directory?"
       echo "  That is what you must do."
    fi
-   cd $XPC66
+   cd $CFG66
+}
 
-fi
-
-if test "$DOUPDATE" = "yes" ; then
-   meson subprojects update
-fi
-
-if test "$DOMAKE" = "yes" ; then
-
-# TODO: use a separate build directory for Clang.
-#
-# $ CC=clang CXX=clang++ meson setup buildclang
-#
-# https://mesonbuild.com/Running-Meson.html
-
-   POTEXTDEF=""
-   if test "$DOPOTEXT" = "yes" ; then
-   POTEXTDEF="-Dpotext=true"
-   fi
-
-   if test "$DOCLANG" = "yes" ; then
-      echo "Using the Clang C/C++ compilers..."
-      export CC=clang
-      export CXX=clang++
-   elif test "$DOGNU" = "yes" ; then
-      echo "Using the GNU C/C++ compilers..."
-      export CC=gcc
-      export CXX=g++
-   else
-      echo "Using the default C/C++ compilers..."
-   fi
-
-   echo "Making all xpc66 libraries..."
-
+make_projects () {
+   echo "Making the $XPC66 library..."
    NINJA_EXISTS="no"
    if test -f "$MAKEFILE" ; then
       NINJA_EXISTS="yes"
    fi
-
    if test "$DOREMAKE" = "yes" ; then
       if test "$NINJA_EXISTS" = "yes" ; then
          echo "$MAKEFILE exists, reconfiguring..."
-         meson --reconfigure . build
+         meson setup --reconfigure $MOPTS
       fi
    fi
-
    if test "$NINJA_EXISTS" = "no" ; then
       echo "New configuration, creating $MAKEFILE, etc...."
       if test "$DODEBUG" = "yes" ; then
-         meson setup --buildtype=debug --default-library=static build/
+         meson setup --default-library=static $MOPTS
          echo "... for debugging"
       else
-         meson setup --buildtype=release build/
+         meson setup $MOPTS
          echo "... for release"
       fi
    fi
 
    # Could also run "meson compile" here.  The --verbose option is not
    # present on older ninjas, so we use -v here.
-   #
-   # Can't add this at the end, it seems to break ninja's error detection.
-   #
-   # echo "# vim: ft=sh" >> make.log
 
-   cd build
-   ninja -v > make.log
+   cd $BUILD_DIR
+   ninja -v > $MAKELOG
    if test $? = 0 ; then
       if test "$DODEBUG" = "yes" ; then
-         echo "Debug build succeeded."
+         echo "Debug build in $BUILD_DIR succeeded."
       else
-         echo "Release build succeeded."
+         echo "Release build in $BUILD_DIR succeeded."
       fi
    else
       if test "$DODEBUG" = "yes" ; then
-         echo "Debug build failed, check build/make.log for errors."
+         echo "Debug build failed, check $BUILD_DIR/make.log for errors."
       else
-         echo "Release build failed, check build/make.log for errors."
+         echo "Release build failed, check $BUILD_DIR/make.log for errors."
       fi
    fi
    cd ..
+}
 
-fi
-
+#******************************************************************************
 # Check for root, then install. We could let meson prompt the user
 # to automatically become root. Note that there are two possible locations
 # for the library and pkgconfig to be installed on Linux:
 #
 #     -  /usr/local/lib/
 #     -  /usr/local/lib/x86_64-linux-gnu/
+#------------------------------------------------------------------------------
 
-if test "$DOINSTALL" = "yes" ; then
-
+install_project () {
    USERID=$(id -u)
    if test "$USERID" = 0 ; then
-      cd build
-      echo "Installing the xpc66 library..."
+      cd $BUILD_DIR
+      echo "Installing the seq66 library..."
       meson install
       cd ..
    else
-      echo "We want you to be root to install the xpc66 library..."
+      echo "UID $USERID. We want you as root to install the $XPC66 library..."
    fi
+}
 
-fi
-
+#******************************************************************************
 # Uninstallation is odd with Meson. The following does not work. And
 # the call to ninja does not remove some directories.
 #
@@ -432,27 +483,178 @@ fi
 #     meson --internal uninstall
 #     cd ..
 #
-# Note that there are no man pages yet.
-#
-# We could 
+#------------------------------------------------------------------------------
 
-
-if test "$DOUNINSTALL" = "yes" ; then
-
+uninstall_project () {
    USERID=$(id -u)
    if test "$USERID" = 0 ; then
-      echo "Uninstalling the cfg66 library..."
-      ninja -C build uninstall
+      echo "Uninstalling the $XPC66 library..."
+      ninja -C $BUILD_DIR uninstall
       if test "$PLATFORM" = "UNIX" ; then
          rm -rf "$INSTALL_PREFIX/include/$XPC66_LIBRARY"
-         rm -rf "$INSTALL_PREFIX/$INSTALL_LIBDIR/$POTEXT_LIBRARY"
+         rm -rf "$INSTALL_PREFIX/$INSTALL_LIBDIR/$XPC66_LIBRARY"
          rm -rf "$INSTALL_PREFIX/share/doc/$XPC66"
 #        rm -rf "$INSTALL_PREFIX/man/man1/$XPC66.1"
       fi
    else
-      echo "UID $USERID. We want you as root to uninstall the cfg66 library..."
+      echo "UID $USERID. We want you as root to uninstall the $XPC66 library..."
    fi
+}
 
+#******************************************************************************
+#  Parse the command-line options.
+#------------------------------------------------------------------------------
+
+get_options $*
+
+#******************************************************************************
+#  Version info
+#------------------------------------------------------------------------------
+
+if test "$DOVERSION" = "yes" ; then
+   show_version
+   exit 0
+fi
+
+#******************************************************************************
+#  Help
+#------------------------------------------------------------------------------
+
+if test "$DOHELP" = "yes" ; then
+
+   show_help
+   exit 0
+
+elif test "$DOOPTHELP" = "yes" ; then
+
+#  cat extras/help/options.help
+   echo "--option-help not yet supported."
+   exit 0
+
+fi
+
+if test "$DODIST" = "yes" ; then
+
+   meson dist
+   exit 0
+
+fi
+
+#******************************************************************************
+# Make the PDF, then exit. We might get doc/latex/tex/meson.build
+# to do this work at some point, but for now we use a script in
+# the doc/latex directory.
+#
+# ENABLE_DOCS=""
+# if test "$DOMAKEPDF" = "yes" ; then
+#    ENABLE_DOCS="-Ddocs=true"
+#    echo "Will rebuild the Seq66 User Manual...."
+# fi
+#------------------------------------------------------------------------------
+
+if test "$DOMAKEPDF" = "yes" ; then
+   make_pdf
+   exit 0
+fi
+
+# This removes the work products, but leaves the README intact.
+
+if test $DOCLEAN = "yes" ; then
+   clean_build
+fi
+
+# This is just a quick pack, with date and branch information added.
+
+if test $DOPACK = "yes" ; then
+   make_pack
+   exit 0
+fi
+
+if test "$DOUPDATE" = "yes" ; then
+   meson subprojects update
+   exit 0
+fi
+
+MOPTS="--buildtype=$BUILD_TYPE $POTEXTDEF $BUILD_DIR"
+
+#******************************************************************************
+# --setup. This section does only a setup, then exits.
+#------------------------------------------------------------------------------
+
+if test "$DOSETUP" = "yes"; then
+   if test "$DODEBUG" = "yes" ; then
+      meson setup --default-library=static $MOPTS
+      echo "... for debugging"
+   else
+      meson setup $MOPTS
+      echo "... for release"
+   fi
+   exit 0
+fi
+
+#******************************************************************************
+# --cross. This function sets options appropriate for Windows builds,
+#          does the build, and exits.
+#
+# EXPERIMENTAL.
+#
+# Currently does not support the Potext library or a debug build.
+#------------------------------------------------------------------------------
+
+if test "$DOCROSS" = "yes" ; then
+
+   CROSSOPTS="-Dpotext=false"
+   CROSSFILE="--cross-file meson.mingw.cross"
+   meson setup $BUILD_DIR --buildtype=$BUILD_TYPE $CROSSOPTS $CROSSFILE
+   if test $? = 0 ; then
+      meson compile -C $BUILD_DIR > $MAKELOG
+      if test $? = 0 ; then
+         echo "Cross-build in $BUILD_DIR succeeded."
+         exit 0
+      else
+         echo "Cross-build failed, check $MAKELOG for errors."
+         exit 1
+      fi
+   fi
+fi
+
+if test "$DONSIS" = "yes" ; then
+   meson compile -C $BUILD_DIR nsisinstaller
+   exit 0
+fi
+
+if test "$DOMAKE" = "yes" ; then
+   make_projects
+   exit 0
+fi
+
+#******************************************************************************
+# Check for root, then install. We could let meson prompt the user
+# to automatically become root. Note that there are two possible locations
+# for the library and pkgconfig to be installed on Linux:
+#
+#     -  /usr/local/lib/
+#     -  /usr/local/lib/x86_64-linux-gnu/
+#------------------------------------------------------------------------------
+
+if test "$DOINSTALL" = "yes" ; then
+   install_project
+   exit 0
+fi
+
+#******************************************************************************
+# Uninstallation is odd with Meson. The following does not work. And
+# the call to ninja does not remove some directories.
+#
+#     cd $BUILD_DIR
+#     meson --internal uninstall
+#     cd ..
+#
+# Note that there are no man pages yet.
+#------------------------------------------------------------------------------
+
+if test "$DOUNINSTALL" = "yes" ; then
+   uninstall_project
 fi
 
 #******************************************************************************
