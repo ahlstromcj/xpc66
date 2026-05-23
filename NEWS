@@ -1,8 +1,25 @@
-NEWS for Xpc66 0.1.1
+NEWS for Xpc66 0.2
 Chris Ahlstrom
-2024-04-15 to 2024-04-30
+2024-04-15 to 2026-05-23
 
 # Changelog
+
+## [0.2] - 2026-05-23
+
+This release gets the library and test applications to build for MinGW-w64
+on Linux.
+
+### Added
+
+- A meson.mingw.cross cross-build file is provided.
+
+### Fixed
+
+- The MinGW cross-build now works on Linux.
+
+### Changed
+
+- The work.sh and meson.build's have been enhanced.
 
 ## [0.1.1] - 2024-04-30
 

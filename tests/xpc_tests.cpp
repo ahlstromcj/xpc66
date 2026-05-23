@@ -24,7 +24,7 @@
  * \library       xpc66
  * \author        Chris Ahlstrom
  * \date          2022-07-03
- * \updates       2026-05-21
+ * \updates       2026-05-23
  * \license       See above.
  *
  *  To do: add a help-line for each option.
@@ -35,6 +35,7 @@
 #include <string>                       /* std::string                      */
 
 #include "xpc66.hpp"                    /* xpc66_version() function         */
+#include "xpc/condition.hpp"            /* xpc::condition class          */
 #include "xpc/fifo.hpp"                 /* xpc::run_fifo_test()             */
 #include "xpc/kbhit.hpp"                /* xpc::kbhit(), getch(), etc.      */
 #include "xpc/ring_buffer.hpp"          /* xpc::run_ring_test()             */
@@ -102,6 +103,14 @@ test_kbget ()
     return true;
 }
 
+bool
+test_condition_linkage ()
+{
+    xpc::condition c;
+    c.wait(10);
+    return true;
+}
+
 #if defined TEST_SHELL_EXECUTION
 
 /*
@@ -162,6 +171,9 @@ main (int /*argc*/, char * /*argv*/ [])
         success = xpc::run_fifo_test();
 
 #endif
+
+    if (success)
+        success = test_condition_linkage();
 
 #if defined TEST_SHELL_EXECUTION
 

@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2026-05-22
+# \updates     2026-05-23
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. It was part of the libs66
@@ -62,7 +62,7 @@ endif
 xpc66_pkg_description = 'Refactoring the base Seq66 OS-dependent modules.'
 xpc66_pkg_version = meson.project_version()
 xpc66_api_version = '0.2'
-xpc66_info_date = '2026-05-22'
+xpc66_info_date = '2026-05-23'
 xpc66_info_build_type = get_option('buildtype')
 xpc66_info_build_root = meson.project_build_root()
 xpc66_info_lib_type = get_option('default_library')
@@ -199,6 +199,10 @@ liblib66_library_dep = dependency(
    'liblib66', fallback : [ 'liblib66', 'liblib66_dep' ]
    )
 
+threads_dep = dependency('threads')        # meson's shorthand for pthreads
+
+winmm_dep = cc.find_library('winmm', required : os_win32)
+
 #-----------------------------------------------------------------------------
 # Sub-directories. 'tests' has to be descended into later.
 #-----------------------------------------------------------------------------
@@ -246,7 +250,9 @@ if xpc66_use_potext
       install_dir : xpc66_libdir,
       c_args : build_args,
       cpp_args : build_args,
-      dependencies : [ liblib66_library_dep, libpotext_library_dep ],
+      dependencies : [ liblib66_library_dep, threads_dep, winmm_dep,
+         libpotext_library_dep
+         ],
       include_directories : [ libxpc66_includes ]
       )
 
@@ -259,7 +265,7 @@ else
       install_dir : xpc66_libdir,
       c_args : build_args,
       cpp_args : build_args,
-      dependencies : [ liblib66_library_dep ],
+      dependencies : [ liblib66_library_dep, threads_dep, winmm_dep ],
       include_directories : [ libxpc66_includes ]
       )
 

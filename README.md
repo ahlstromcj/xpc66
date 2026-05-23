@@ -1,4 +1,4 @@
-# README for Library Xpc66 0.2.0 2026-02-26
+# README for Library Xpc66 0.2.0 2026-05-23
 
 __Xpc66__ is a cross-platform utilities library based on the "util" and "os"
 directories of the __Seq66__ project, but that is useful in other applications.
@@ -29,6 +29,7 @@ Support sites (still in progress):
     *   Basic dependencies: Meson 1.1 and above; C++17 and above.
     *   The build system is Meson, and sample wrap files are provided
         for using Xpc66 as a C++ subproject.
+    *   A MinGW cross-build option is available.
     *   PDF documentation built from LaTeX.
 
 ##  Code
@@ -42,7 +43,8 @@ Support sites (still in progress):
 
 ##  Fixes
 
-    *   Improved the work.sh, added an --uninstall option.
+    *   Improved the work.sh, added an --uninstall option, --cross option,
+        and more.
 
 ##  Documentation
 

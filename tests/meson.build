@@ -6,7 +6,7 @@
 # \library     xpc66
 # \author      Chris Ahlstrom
 # \date        2022-07-03
-# \updates     2025-10-05
+# \updates     2026-05-23
 # \license     $XPC_SUITE_GPL_LICENSE$
 #
 #  This file is part of the "xpc66" library. See the top-level meson.build
@@ -17,7 +17,7 @@
 xpc_tests_exe = executable(
    'xpc_tests',
    sources : [ 'xpc_tests.cpp' ],
-   dependencies : [ libxpc66_dep, liblib66_library_dep ]
+   dependencies : [ libxpc66_dep, threads_dep, liblib66_library_dep ]
    )
 
 errnames_exe = executable(
@@ -34,4 +34,3 @@ test('Errno Name Lookup', errnames_exe)
 #----------------------------------------------------------------------------
 # vim: ts=3 sw=3 ft=meson
 #----------------------------------------------------------------------------
-

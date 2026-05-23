@@ -1,6 +1,8 @@
-Release Notes for Xpc66 v. 0.1.0 2024-04-17
+Release Notes for Xpc66 v. 0.2.0 2026-05-23
 
-- Initial release.
+- C++17 and Meson 1.4 and up are now required.
+- The build scripts have been substantially enhanced.
+- There is now an option to make a MinGW cross-build. See work.sh --cross.
 
 See NEWS for more details, and ChangeLog.
 

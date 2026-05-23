@@ -23,7 +23,7 @@
  * \file          daemonize.hpp
  * \author        Chris Ahlstrom
  * \date          2005-07-03 to 2007-08-21 (from xpc-suite project)
- * \updates       2024-04-17
+ * \updates       2026-05-23
  * \license       GNU GPLv2 or above
  *
  *    Daemonization of POSIX C Wrapper (PSXC) library
@@ -31,11 +31,20 @@
  *
  *    This module provides a function to make it easy to run an application
  *    as a daemon.
+ *
+ *    In MinGW, 'mode_t' is an alias for 'unsigned short' used to represent
+ *    file, directory, and permission attributes. Windows lacks native
+ *    POSIX permission concepts (uga + rwx), so MinGW treats it as a shim
+ *    to compile cross-platform code while translating POSIX calls to
+ *    native Windows APIs. Typically defined in <sys/types.h>.
+typedef unsigned short _mode_t;
+#define mode_t _mode_t
  */
 
-#include <string>
-
 #include "platform_macros.h"            /* for detecting 32-bit builds      */
+
+#include <sys/types.h>                  /* mode_t in UNIX or MINGW          */
+#include <string>
 
 namespace xpc
 {
